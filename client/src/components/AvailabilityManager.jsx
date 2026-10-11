@@ -15,7 +15,8 @@ import {
   ChevronRight, 
   Eye, 
   Filter, 
-  Sliders
+  Sliders,
+  MapPin
 } from 'lucide-react';
 import { apiRequest } from '../api';
 
@@ -74,7 +75,7 @@ export const AvailabilityManager = () => {
     setSuccess('');
     try {
       await apiRequest('/availability/admin/teams', { method: 'POST', body: JSON.stringify(newTeam) });
-      setSuccess('Team registered successfully! ✓');
+      setSuccess('Team registered successfully.');
       setNewTeam({ name: '', team_type: 'photography', leader_name: '', leader_mobile: '', member_count: 2, notes: '' });
       loadData();
     } catch (err) {
@@ -100,7 +101,7 @@ export const AvailabilityManager = () => {
     setSuccess('');
     try {
       await apiRequest('/availability/admin/equipment', { method: 'POST', body: JSON.stringify(newEquip) });
-      setSuccess('Equipment kit added successfully! ✓');
+      setSuccess('Equipment kit added successfully.');
       setNewEquip({ asset_id: '', name: '', category: 'camera', quantity: 1, condition: 'excellent', availability: 'available', notes: '', assigned_team_id: '' });
       loadData();
     } catch (err) {
@@ -126,7 +127,7 @@ export const AvailabilityManager = () => {
     setSuccess('');
     try {
       await apiRequest('/availability/admin/blocks', { method: 'POST', body: JSON.stringify(newBlock) });
-      setSuccess('Manual block recorded successfully! ✓');
+      setSuccess('Manual block recorded.');
       setNewBlock({ date: selectedCalendarDate, block_type: 'date', start_time: '10:00', end_time: '22:00', target_team_id: '', target_equipment_id: '', max_capacity: '', reason: '' });
       loadData();
     } catch (err) {
@@ -136,10 +137,10 @@ export const AvailabilityManager = () => {
 
   // Delete Block
   const handleDeleteBlock = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this block? / क्या आप इस ब्लॉक को हटाना चाहते हैं?')) return;
+    if (!window.confirm('Are you sure you want to remove this block?')) return;
     try {
       await apiRequest(`/availability/admin/blocks/${id}`, { method: 'DELETE' });
-      setSuccess('Block deleted successfully! ✓');
+      setSuccess('Block removed.');
       loadData();
     } catch (err) {
       setError(err.message);
@@ -148,12 +149,12 @@ export const AvailabilityManager = () => {
 
   // Delete Team
   const handleDeleteTeam = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete team "${name}"? / क्या आप "${name}" टीम को हटाना चाहते हैं?`)) return;
+    if (!window.confirm(`Are you sure you want to delete team "${name}"?`)) return;
     setError('');
     setSuccess('');
     try {
       const res = await apiRequest(`/availability/admin/teams/${id}`, { method: 'DELETE' });
-      setSuccess(res.message || 'Team deleted successfully! ✓');
+      setSuccess(res.message || 'Team deleted successfully.');
       loadData();
     } catch (err) {
       setError(err.message || 'Failed to delete team');
@@ -162,12 +163,12 @@ export const AvailabilityManager = () => {
 
   // Delete Equipment
   const handleDeleteEquipment = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete "${name}"? / क्या आप इस उपकरण को हटाना चाहते हैं?`)) return;
+    if (!window.confirm(`Are you sure you want to remove "${name}" from inventory?`)) return;
     setError('');
     setSuccess('');
     try {
       const res = await apiRequest(`/availability/admin/equipment/${id}`, { method: 'DELETE' });
-      setSuccess(res.message || 'Equipment deleted successfully! ✓');
+      setSuccess(res.message || 'Equipment deleted successfully.');
       loadData();
     } catch (err) {
       setError(err.message || 'Failed to delete equipment');
@@ -181,7 +182,7 @@ export const AvailabilityManager = () => {
     setSuccess('');
     try {
       await apiRequest('/availability/admin/settings', { method: 'PATCH', body: JSON.stringify(settingsForm) });
-      setSuccess('Capacity and buffer settings saved! ✓');
+      setSuccess('Scheduling settings updated.');
       loadData();
     } catch (err) {
       setError(err.message);
@@ -302,24 +303,27 @@ export const AvailabilityManager = () => {
          ======================================================== */}
       {activeSubTab === 'resources' && (
         <div className="space-y-6">
-          {/* Buyer-friendly explanatory banner */}
-          <div className="bg-gradient-to-r from-gold-50/80 via-white to-gold-50/50 border border-gold-300/60 rounded-2xl p-4 sm:p-5 shadow-xs">
-            <div className="flex items-start gap-3">
-              <span className="text-xl">💡</span>
-              <div className="space-y-1 text-xs">
-                <p className="font-bold text-charcoal-900 text-sm">
-                  Owner Quick Guide / संसाधन प्रबंधन गाइड
-                </p>
-                <p className="text-charcoal-700 leading-relaxed">
-                  यहाँ से आप अपनी <b>Production Teams</b> (Photographer/Videographer) और <b>Camera/Drone Equipment</b> जोड़ (Add) व हटा (Delete) सकते हैं। 
-                  आपकी सुविधा के लिए अभी <b>2 डेमो टीमें</b> और <b>2 डेमो उपकरण</b> रखे गए हैं ताकि आप इसे आसानी से समझ सकें। आप कभी भी नया जोड़ सकते हैं या डिलीट कर सकते हैं।
-                </p>
-                <div className="flex flex-wrap gap-2 pt-1 text-[11px] font-semibold text-gold-900">
-                  <span className="bg-white/80 border border-gold-300 px-2.5 py-0.5 rounded-full">✓ 1-Click Delete Available</span>
-                  <span className="bg-white/80 border border-gold-300 px-2.5 py-0.5 rounded-full">✓ 100% Mobile Responsive</span>
-                  <span className="bg-white/80 border border-gold-300 px-2.5 py-0.5 rounded-full">✓ Active/Inactive Toggle</span>
-                </div>
-              </div>
+          {/* Studio Resource Metrics */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="bg-white border border-gold-300/40 rounded-2xl p-4 shadow-xs">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-charcoal-400">Production Teams</span>
+              <p className="font-serif text-2xl font-bold text-charcoal-900 mt-1">{overview.teams.length}</p>
+              <p className="text-[11px] text-charcoal-500 mt-0.5">{overview.teams.filter(t => t.status === 'active').length} active units</p>
+            </div>
+            <div className="bg-white border border-gold-300/40 rounded-2xl p-4 shadow-xs">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-charcoal-400">Equipment Inventory</span>
+              <p className="font-serif text-2xl font-bold text-charcoal-900 mt-1">{overview.equipment.length}</p>
+              <p className="text-[11px] text-charcoal-500 mt-0.5">{overview.equipment.filter(e => e.availability === 'available').length} operational kits</p>
+            </div>
+            <div className="bg-white border border-gold-300/40 rounded-2xl p-4 shadow-xs">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-charcoal-400">Max Daily Capacity</span>
+              <p className="font-serif text-2xl font-bold text-charcoal-900 mt-1">{overview.settings?.daily_booking_capacity || 3}</p>
+              <p className="text-[11px] text-charcoal-500 mt-0.5">concurrent bookings/day</p>
+            </div>
+            <div className="bg-white border border-gold-300/40 rounded-2xl p-4 shadow-xs">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-charcoal-400">Turnaround Buffer</span>
+              <p className="font-serif text-2xl font-bold text-charcoal-900 mt-1">{overview.settings?.buffer_hours || 1}h</p>
+              <p className="text-[11px] text-charcoal-500 mt-0.5">transit & gear prep</p>
             </div>
           </div>
 
@@ -726,13 +730,17 @@ export const AvailabilityManager = () => {
 
                     <div className="space-y-0.5 text-[9px] sm:text-[10px]">
                       {stats.approved > 0 && (
-                        <p className="font-semibold text-emerald-700 truncate">
-                          ✓ <span className="hidden sm:inline">{stats.approved} conf</span><span className="sm:hidden">{stats.approved}</span>
+                        <p className="font-semibold text-emerald-700 truncate flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                          <span className="hidden sm:inline">{stats.approved} confirmed</span>
+                          <span className="sm:hidden">{stats.approved} conf</span>
                         </p>
                       )}
                       {stats.pending > 0 && (
-                        <p className="font-semibold text-amber-600 truncate">
-                          ⏳ <span className="hidden sm:inline">{stats.pending} pend</span><span className="sm:hidden">{stats.pending}</span>
+                        <p className="font-semibold text-amber-600 truncate flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                          <span className="hidden sm:inline">{stats.pending} pending</span>
+                          <span className="sm:hidden">{stats.pending} pend</span>
                         </p>
                       )}
                     </div>
@@ -783,9 +791,18 @@ export const AvailabilityManager = () => {
                         </span>
                       </div>
                       <p className="font-bold text-charcoal-900 text-xs">{b.customer_name} ({b.event_type})</p>
-                      <p className="text-[11px] text-charcoal-600">
-                        🕒 {b.event_start_time || '10:00'} - {b.event_end_time || '22:00'} · 📍 {b.venue}
-                      </p>
+                      <div className="text-[11px] text-charcoal-600 flex flex-wrap items-center gap-x-3 gap-y-1">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-gold-600 shrink-0" />
+                          {b.event_start_time || '10:00'} - {b.event_end_time || '22:00'}
+                        </span>
+                        {b.venue && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3 text-gold-600 shrink-0" />
+                            {b.venue}
+                          </span>
+                        )}
+                      </div>
                       {b.allocated_resources && b.allocated_resources.length > 0 && (
                         <div className="flex flex-wrap gap-1 pt-1">
                           {b.allocated_resources.map((res, i) => (
@@ -884,7 +901,10 @@ export const AvailabilityManager = () => {
                   <div key={bl.id} className="p-3 rounded-2xl border border-gold-200 bg-white flex flex-wrap items-center justify-between gap-3 text-xs">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-charcoal-900">📅 {bl.date}</span>
+                        <span className="font-bold text-charcoal-900 flex items-center gap-1.5">
+                          <CalendarIcon className="w-3.5 h-3.5 text-gold-600" />
+                          {bl.date}
+                        </span>
                         <span className="px-2 py-0.5 rounded-full bg-gold-100 text-gold-800 font-semibold uppercase text-[10px]">
                           {bl.block_type || 'Full Date'}
                         </span>
