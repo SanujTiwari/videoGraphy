@@ -780,6 +780,16 @@ export const PackageEditor = ({ pkg, onSaved }) => {
               onChange={(e) => setNewFeature(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
             />
+            <button
+              type="button"
+              onClick={addFeature}
+              className="px-4 py-2 border border-gold-400 text-gold-700 hover:bg-gold-50 rounded-xl text-xs font-semibold shrink-0 flex items-center gap-1"
+            >
+              <Plus className="w-3.5 h-3.5" /> Add
+            </button>
+          </div>
+        </div>
+
         {/* SECTION C.2: Resource Requirements */}
         <div className="bg-charcoal-50 p-4 rounded-2xl border border-charcoal-200/60 space-y-3">
           <div className="flex items-center justify-between">
