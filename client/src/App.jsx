@@ -50,7 +50,8 @@ function Layout() {
           <Route path="/track" element={<Track />}/>
           <Route path="/login" element={<Login />}/>
           <Route path="/portal" element={<RequireRole roles={['customer', 'owner', 'manager']}><Portal /></RequireRole>}/>
-          <Route path="/admin/dashboard" element={<RequireRole roles={['owner', 'manager']}><AdminDashboard /></RequireRole>}/>
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="/admin/dashboard" element={<RequireRole roles={['owner', 'manager', 'admin']}><AdminDashboard /></RequireRole>}/>
           <Route path="*" element={<Navigate to="/" replace/>}/>
         </Routes>
       </main>

@@ -14,7 +14,9 @@ import {
   History,
   Heart,
   ChevronDown,
-  UserCircle
+  UserCircle,
+  Package,
+  Clock
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
@@ -39,7 +41,7 @@ export const Navbar = () => {
   const navigate = useNavigate();
 
   const isManagerOrOwner =
-    user && (user.role === 'owner' || user.role === 'manager');
+    user && (user.role === 'owner' || user.role === 'manager' || user.role === 'admin');
 
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
     WHATSAPP_MESSAGE
@@ -222,117 +224,155 @@ export const Navbar = () => {
 
                     {/* USER INFORMATION */}
 
+                    {/* USER / ADMIN INFORMATION */}
                     <div className="user-dropdown-header">
-
                       <div className="user-avatar">
-                        {user?.name
-                          ? user.name.charAt(0).toUpperCase()
+                        {isManagerOrOwner
+                          ? 'A'
+                          : user?.full_name || user?.name
+                          ? (user.full_name || user.name).charAt(0).toUpperCase()
                           : 'U'}
                       </div>
 
                       <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="user-dropdown-name">
+                            {isManagerOrOwner
+                              ? (user?.full_name || user?.name || 'Studio Admin')
+                              : (user?.full_name || user?.name || 'Customer')}
+                          </p>
+                          {isManagerOrOwner && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                              {user?.role === 'owner' ? 'Owner' : 'Admin'}
+                            </span>
+                          )}
+                        </div>
 
-                        <p className="user-dropdown-name">
-                          {user?.name || 'User'}
+                        <p className="user-dropdown-email truncate">
+                          {user?.email || (user?.mobile ? `+91 ${user.mobile}` : isManagerOrOwner ? 'Owner Account' : 'Customer Account')}
                         </p>
-
-                        <p className="user-dropdown-email">
-                          {user?.email || 'Customer'}
-                        </p>
-
                       </div>
-
                     </div>
 
-
-                    {/* ACCOUNT OPTIONS */}
-
+                    {/* ACCOUNT OPTIONS (ADMIN PERSPECTIVE VS CUSTOMER PERSPECTIVE) */}
                     <div className="user-dropdown-body">
+                      {isManagerOrOwner ? (
+                        <>
+                          <Link
+                            to="/admin/dashboard"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="user-dropdown-item"
+                          >
+                            <Shield className="user-dropdown-icon" />
+                            <span>Dashboard Overview</span>
+                          </Link>
 
-                      <Link
-                        to="/portal"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="user-dropdown-item"
-                      >
-                        <User className="user-dropdown-icon" />
-                        <span>Profile</span>
-                      </Link>
+                          <Link
+                            to="/admin/dashboard?tab=bookings"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="user-dropdown-item"
+                          >
+                            <Calendar className="user-dropdown-icon" />
+                            <span>Manage Bookings</span>
+                          </Link>
 
+                          <Link
+                            to="/admin/dashboard?tab=packages"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="user-dropdown-item"
+                          >
+                            <Package className="user-dropdown-icon" />
+                            <span>Packages & Pricing</span>
+                          </Link>
 
-                      <Link
-                        to="/portal?tab=bookings"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="user-dropdown-item"
-                      >
-                        <Calendar className="user-dropdown-icon" />
-                        <span>Your Bookings</span>
-                      </Link>
+                          <Link
+                            to="/admin/dashboard?tab=availability"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="user-dropdown-item"
+                          >
+                            <Clock className="user-dropdown-icon" />
+                            <span>Availability & Resources</span>
+                          </Link>
 
+                          <Link
+                            to="/admin/dashboard?tab=settings"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="user-dropdown-item"
+                          >
+                            <Settings className="user-dropdown-icon" />
+                            <span>Studio Settings</span>
+                          </Link>
 
-                      <Link
-                        to="/portal?tab=payments"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="user-dropdown-item"
-                      >
-                        <CreditCard className="user-dropdown-icon" />
-                        <span>Payments</span>
-                      </Link>
+                          <Link
+                            to="/admin/dashboard?tab=inquiries"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="user-dropdown-item"
+                          >
+                            <History className="user-dropdown-icon" />
+                            <span>Inquiries & Audit</span>
+                          </Link>
+                        </>
+                      ) : (
+                        <>
+                          <Link
+                            to="/portal"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="user-dropdown-item"
+                          >
+                            <User className="user-dropdown-icon" />
+                            <span>Profile</span>
+                          </Link>
 
+                          <Link
+                            to="/portal?tab=bookings"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="user-dropdown-item"
+                          >
+                            <Calendar className="user-dropdown-icon" />
+                            <span>Your Bookings</span>
+                          </Link>
 
-                      <Link
-                        to="/portal?tab=history"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="user-dropdown-item"
-                      >
-                        <History className="user-dropdown-icon" />
-                        <span>Booking History</span>
-                      </Link>
+                          <Link
+                            to="/portal?tab=payments"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="user-dropdown-item"
+                          >
+                            <CreditCard className="user-dropdown-icon" />
+                            <span>Payments</span>
+                          </Link>
 
+                          <Link
+                            to="/portal?tab=history"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="user-dropdown-item"
+                          >
+                            <History className="user-dropdown-icon" />
+                            <span>Booking History</span>
+                          </Link>
 
-                      <Link
-                        to="/portal?tab=wishlist"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="user-dropdown-item"
-                      >
-                        <Heart className="user-dropdown-icon" />
-                        <span>Wishlist</span>
-                      </Link>
+                          <Link
+                            to="/portal?tab=wishlist"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="user-dropdown-item"
+                          >
+                            <Heart className="user-dropdown-icon" />
+                            <span>Wishlist</span>
+                          </Link>
 
-
-                      <Link
-                        to="/portal?tab=settings"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="user-dropdown-item"
-                      >
-                        <Settings className="user-dropdown-icon" />
-                        <span>Settings</span>
-                      </Link>
-
+                          <Link
+                            to="/portal?tab=settings"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="user-dropdown-item"
+                          >
+                            <Settings className="user-dropdown-icon" />
+                            <span>Settings</span>
+                          </Link>
+                        </>
+                      )}
                     </div>
-
-
-                    {/* ADMIN PORTAL */}
-
-                    {isManagerOrOwner && (
-                      <div className="user-dropdown-admin">
-
-                        <Link
-                          to="/admin/dashboard"
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="user-dropdown-item admin-dropdown-item"
-                        >
-                          <Shield className="user-dropdown-icon" />
-                          <span>Studio Admin Portal</span>
-                        </Link>
-
-                      </div>
-                    )}
-
 
                     {/* LOGOUT */}
-
                     <div className="user-dropdown-footer">
-
                       <button
                         type="button"
                         onClick={handleLogout}
@@ -341,7 +381,6 @@ export const Navbar = () => {
                         <LogOut className="w-[17px] h-[17px]" />
                         <span>Logout</span>
                       </button>
-
                     </div>
 
                   </div>
@@ -540,86 +579,132 @@ export const Navbar = () => {
 
 
           {/* MOBILE ACCOUNT */}
-
           {user && (
             <div className="mt-4 pt-4 border-t border-blue-100">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase tracking-wider text-charcoal-400 font-semibold">
+                  {isManagerOrOwner ? 'Studio Administration' : 'My Account'}
+                </p>
+                {isManagerOrOwner && (
+                  <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                    {user?.role === 'owner' ? 'Owner' : 'Admin'}
+                  </span>
+                )}
+              </div>
 
-              <p className="text-xs uppercase tracking-wider text-charcoal-400 mb-2">
-                My Account
-              </p>
+              {isManagerOrOwner ? (
+                <>
+                  <Link
+                    to="/admin/dashboard"
+                    onClick={closeMobileMenu}
+                    className="mobile-account-link"
+                  >
+                    <Shield className="w-4 h-4" />
+                    Dashboard Overview
+                  </Link>
 
+                  <Link
+                    to="/admin/dashboard?tab=bookings"
+                    onClick={closeMobileMenu}
+                    className="mobile-account-link"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Manage Bookings
+                  </Link>
 
-              <Link
-                to="/portal"
-                onClick={closeMobileMenu}
-                className="mobile-account-link"
-              >
-                <User className="w-4 h-4" />
-                Profile
-              </Link>
+                  <Link
+                    to="/admin/dashboard?tab=packages"
+                    onClick={closeMobileMenu}
+                    className="mobile-account-link"
+                  >
+                    <Package className="w-4 h-4" />
+                    Packages & Pricing
+                  </Link>
 
+                  <Link
+                    to="/admin/dashboard?tab=availability"
+                    onClick={closeMobileMenu}
+                    className="mobile-account-link"
+                  >
+                    <Clock className="w-4 h-4" />
+                    Availability & Resources
+                  </Link>
 
-              <Link
-                to="/portal?tab=bookings"
-                onClick={closeMobileMenu}
-                className="mobile-account-link"
-              >
-                <Calendar className="w-4 h-4" />
-                Your Bookings
-              </Link>
+                  <Link
+                    to="/admin/dashboard?tab=settings"
+                    onClick={closeMobileMenu}
+                    className="mobile-account-link"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Studio Settings
+                  </Link>
 
+                  <Link
+                    to="/admin/dashboard?tab=inquiries"
+                    onClick={closeMobileMenu}
+                    className="mobile-account-link"
+                  >
+                    <History className="w-4 h-4" />
+                    Inquiries & Audit
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/portal"
+                    onClick={closeMobileMenu}
+                    className="mobile-account-link"
+                  >
+                    <User className="w-4 h-4" />
+                    Profile
+                  </Link>
 
-              <Link
-                to="/portal?tab=payments"
-                onClick={closeMobileMenu}
-                className="mobile-account-link"
-              >
-                <CreditCard className="w-4 h-4" />
-                Payments
-              </Link>
+                  <Link
+                    to="/portal?tab=bookings"
+                    onClick={closeMobileMenu}
+                    className="mobile-account-link"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Your Bookings
+                  </Link>
 
+                  <Link
+                    to="/portal?tab=payments"
+                    onClick={closeMobileMenu}
+                    className="mobile-account-link"
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    Payments
+                  </Link>
 
-              <Link
-                to="/portal?tab=history"
-                onClick={closeMobileMenu}
-                className="mobile-account-link"
-              >
-                <History className="w-4 h-4" />
-                Booking History
-              </Link>
+                  <Link
+                    to="/portal?tab=history"
+                    onClick={closeMobileMenu}
+                    className="mobile-account-link"
+                  >
+                    <History className="w-4 h-4" />
+                    Booking History
+                  </Link>
 
+                  <Link
+                    to="/portal?tab=wishlist"
+                    onClick={closeMobileMenu}
+                    className="mobile-account-link"
+                  >
+                    <Heart className="w-4 h-4" />
+                    Wishlist
+                  </Link>
 
-              <Link
-                to="/portal?tab=wishlist"
-                onClick={closeMobileMenu}
-                className="mobile-account-link"
-              >
-                <Heart className="w-4 h-4" />
-                Wishlist
-              </Link>
-
-
-              <Link
-                to="/portal?tab=settings"
-                onClick={closeMobileMenu}
-                className="mobile-account-link"
-              >
-                <Settings className="w-4 h-4" />
-                Settings
-              </Link>
-
-
-              {isManagerOrOwner && (
-                <Link
-                  to="/admin/dashboard"
-                  onClick={closeMobileMenu}
-                  className="mobile-account-link"
-                >
-                  <Shield className="w-4 h-4" />
-                  Studio Admin Portal
-                </Link>
+                  <Link
+                    to="/portal?tab=settings"
+                    onClick={closeMobileMenu}
+                    className="mobile-account-link"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Settings
+                  </Link>
+                </>
               )}
-
 
               <button
                 type="button"
@@ -627,12 +712,11 @@ export const Navbar = () => {
                   closeMobileMenu();
                   handleLogout();
                 }}
-                className="mobile-account-link text-red-600"
+                className="mobile-account-link text-red-600 mt-2"
               >
                 <LogOut className="w-4 h-4" />
                 Logout
               </button>
-
             </div>
           )}
 
