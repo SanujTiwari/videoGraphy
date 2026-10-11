@@ -6,7 +6,7 @@ const { calculateAuthoritativePricing } = require("../utils/pricing");
 const router = Router();
 
 const formatPackage = (pkg) => {
-    const { details_json, included_services_json, features_json, ...rest } = pkg;
+    const { details_json, included_services_json, features_json, resource_reqs_json, ...rest } = pkg;
     
     // Check if discount is currently active based on dates and toggle
     const todayStr = new Date().toISOString().split('T')[0];
@@ -21,6 +21,14 @@ const formatPackage = (pkg) => {
         details: details_json ? (typeof details_json === 'string' ? JSON.parse(details_json) : details_json) : {},
         included_services: included_services_json ? (typeof included_services_json === 'string' ? JSON.parse(included_services_json) : included_services_json) : [],
         features: features_json ? (typeof features_json === 'string' ? JSON.parse(features_json) : features_json) : [],
+        resource_reqs: resource_reqs_json ? (typeof resource_reqs_json === 'string' ? JSON.parse(resource_reqs_json) : resource_reqs_json) : {
+            photo_teams: 1,
+            video_teams: 1,
+            camera_kits: 2,
+            drones: 0,
+            drone_operators: 0,
+            gimbals: 0,
+        },
     };
 };
 
@@ -169,6 +177,7 @@ router.patch('/admin/:id', authenticateToken, requireRole(['owner', 'manager']),
                 travel_policy = COALESCE(?, travel_policy),
                 extra_travel_charge = ?,
                 terms = ?,
+                resource_reqs_json = COALESCE(?, resource_reqs_json),
                 status = COALESCE(?, status),
                 updated_at = to_char(now() at time zone 'utc', 'YYYY-MM-DD HH24:MI:SS')
             WHERE id = ?
@@ -198,6 +207,7 @@ router.patch('/admin/:id', authenticateToken, requireRole(['owner', 'manager']),
             travel_policy || null,
             extra_travel_charge !== undefined ? extra_travel_charge : existing.extra_travel_charge,
             terms !== undefined ? terms : existing.terms,
+            req.body.resource_reqs ? JSON.stringify(req.body.resource_reqs) : null,
             status || null,
             req.params.id
         );

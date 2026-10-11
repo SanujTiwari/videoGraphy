@@ -40,12 +40,30 @@ export const PackageEditor = ({ pkg, onSaved }) => {
       drone: pkg.details?.drone || '',
     },
 
+    // Resource Requirements for Availability System
+    resource_reqs: pkg.resource_reqs || {
+      photo_teams: 1,
+      video_teams: 1,
+      camera_kits: 2,
+      drones: 0,
+      drone_operators: 0,
+      gimbals: 0,
+    },
+
     // Policies
     travel_policy: pkg.travel_policy || pkg.note || 'Travel charges may apply for event locations more than 30 km from the studio.',
     extra_travel_charge: pkg.extra_travel_charge || '',
     advance_percentage: pkg.advance_percentage || 30,
     terms: pkg.terms || '',
   });
+
+  const handleResourceReqChange = (key, val) => {
+    setIsDirty(true);
+    setFormData((prev) => ({
+      ...prev,
+      resource_reqs: { ...prev.resource_reqs, [key]: Math.max(0, Number(val) || 0) },
+    }));
+  };
 
   const [newInclusion, setNewInclusion] = useState('');
   const [newFeature, setNewFeature] = useState('');
@@ -294,6 +312,7 @@ export const PackageEditor = ({ pkg, onSaved }) => {
         extra_travel_charge: formData.extra_travel_charge,
         advance_percentage: Number(formData.advance_percentage) || 30,
         terms: formData.terms,
+        resource_reqs: formData.resource_reqs,
       };
 
       const res = await apiRequest(`/packages/admin/${pkg.id}`, {
@@ -761,13 +780,76 @@ export const PackageEditor = ({ pkg, onSaved }) => {
               onChange={(e) => setNewFeature(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
             />
-            <button
-              type="button"
-              onClick={addFeature}
-              className="px-4 py-2 border border-gold-400 text-gold-700 hover:bg-gold-50 rounded-xl text-xs font-semibold shrink-0 flex items-center gap-1"
-            >
-              <Plus className="w-3.5 h-3.5" /> Add
-            </button>
+        {/* SECTION C.2: Resource Requirements */}
+        <div className="bg-charcoal-50 p-4 rounded-2xl border border-charcoal-200/60 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-charcoal-800 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-gold-600" /> Resource Requirements (For Availability Engine)
+            </span>
+            <span className="text-[11px] text-charcoal-500">Auto-checked upon customer booking &amp; approval</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div>
+              <label className="text-[11px] font-semibold text-charcoal-700 block mb-1">Photo Teams</label>
+              <input
+                type="number"
+                min="0"
+                className={inputClass}
+                value={formData.resource_reqs?.photo_teams ?? 1}
+                onChange={(e) => handleResourceReqChange('photo_teams', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-charcoal-700 block mb-1">Video Teams</label>
+              <input
+                type="number"
+                min="0"
+                className={inputClass}
+                value={formData.resource_reqs?.video_teams ?? 1}
+                onChange={(e) => handleResourceReqChange('video_teams', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-charcoal-700 block mb-1">Camera Kits</label>
+              <input
+                type="number"
+                min="0"
+                className={inputClass}
+                value={formData.resource_reqs?.camera_kits ?? 2}
+                onChange={(e) => handleResourceReqChange('camera_kits', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-charcoal-700 block mb-1">Drones (Units)</label>
+              <input
+                type="number"
+                min="0"
+                className={inputClass}
+                value={formData.resource_reqs?.drones ?? 0}
+                onChange={(e) => handleResourceReqChange('drones', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-charcoal-700 block mb-1">Drone Pilot</label>
+              <input
+                type="number"
+                min="0"
+                className={inputClass}
+                value={formData.resource_reqs?.drone_operators ?? 0}
+                onChange={(e) => handleResourceReqChange('drone_operators', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-charcoal-700 block mb-1">Gimbal Rigs</label>
+              <input
+                type="number"
+                min="0"
+                className={inputClass}
+                value={formData.resource_reqs?.gimbals ?? 0}
+                onChange={(e) => handleResourceReqChange('gimbals', e.target.value)}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -2,24 +2,19 @@ const { Router } = require("express");
 const { db } = require("../db/database");
 const { requireRole, authenticateToken } = require("../middleware/auth");
 const { sendInstantBookingNotification } = require("../services/notificationService");
+const { 
+  checkAvailability, 
+  allocateResourcesForBooking, 
+  releaseBookingResources, 
+  APPROVED_STATUSES 
+} = require("../services/availabilityService");
+
 const router = Router();
 // Helper to generate unique booking reference
 function generateBookingRef() {
     const randomNum = Math.floor(1000 + Math.random() * 9000);
     const year = new Date().getFullYear();
     return `AV-${year}-${randomNum}`;
-}
-// Statuses that mean the admin has approved the booking. Those dates/times are locked.
-const APPROVED_STATUSES = ['confirmed', 'in_progress', 'editing', 'album_production', 'ready_for_delivery', 'completed'];
-
-// Finds an approved booking on the same date whose time overlaps with the given time
-async function findApprovedClash(date, startTime, endTime, ignoreId) {
-    const start = startTime || '10:00';
-    const end = endTime || '22:00';
-    const marks = APPROVED_STATUSES.map(() => '?').join(',');
-    const rows = await db.prepare(`SELECT * FROM bookings WHERE event_date = ? AND booking_status IN (${marks}) AND id != ?`)
-        .all(date, ...APPROVED_STATUSES, ignoreId || 0);
-    return rows.find((b) => start < (b.event_end_time || '22:00') && (b.event_start_time || '10:00') < end);
 }
 
 // POST /api/bookings - Submit new booking request (Public or Logged-in Customer)
@@ -37,18 +32,18 @@ router.post('/', async (req, res) => {
         if (!mobileRegex.test(customer_mobile.trim())) {
             return res.status(400).json({ error: 'Please enter a valid 10-digit mobile number' });
         }
-        // Check availability block for requested date
-        const blocked = await db.prepare('SELECT * FROM availability_blocks WHERE date = ?').get(event_date);
-        if (blocked) {
-            return res.status(400).json({
-                error: `Studio is fully booked or closed on ${event_date}. Please select an alternative date.`,
-            });
-        }
-        // An approved booking on the same date and time blocks new bookings
-        const clash = await findApprovedClash(event_date, event_start_time, event_end_time);
-        if (clash) {
+        // Validate Availability (Capacity + Manual Blocks + Resources)
+        const availCheck = await checkAvailability({
+            date: event_date,
+            startTime: event_start_time || '10:00',
+            endTime: event_end_time || '22:00',
+            packageId: package_id ? Number(package_id) : null,
+            addOns: add_ons || [],
+        });
+
+        if (!availCheck.available) {
             return res.status(409).json({
-                error: `This date and time is already booked (${clash.event_start_time} - ${clash.event_end_time}). Please choose another date or time.`,
+                error: availCheck.reason || `Requested date/time slot is not available.`
             });
         }
         // Calculate Pricing
@@ -290,13 +285,19 @@ router.patch('/admin/:id/status', authenticateToken, requireRole(['owner', 'mana
     const booking = await db.prepare('SELECT * FROM bookings WHERE id = ?').get(bookingId);
     if (!booking)
         return res.status(404).json({ error: 'Booking not found' });
-    // Do not approve a booking if another approved booking has the same date and time
+
+    // When approving (status in APPROVED_STATUSES), validate and allocate resources atomically
     if (APPROVED_STATUSES.includes(status)) {
-        const clash = await findApprovedClash(booking.event_date, booking.event_start_time, booking.event_end_time, booking.id);
-        if (clash) {
-            return res.status(409).json({ error: `Cannot approve. Booking ${clash.booking_ref} is already approved for this date and time.` });
+        try {
+            await allocateResourcesForBooking(booking.id);
+        } catch (err) {
+            return res.status(409).json({ error: err.message });
         }
+    } else if (['cancelled', 'rejected'].includes(status)) {
+        // When cancelled or rejected, release any allocated resources immediately
+        await releaseBookingResources(booking.id);
     }
+
     // Update Booking Status
     await db.prepare('UPDATE bookings SET booking_status = ? WHERE id = ?').run(status, bookingId);
     // Record Status History
