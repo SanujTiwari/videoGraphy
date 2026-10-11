@@ -1,0 +1,544 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "owner@anmolvideography.com",
+      "password_hash": "$2a$10$K3ygSJREtXpIQde5PVNZgO26UVHdnAbrVFe9MD2gkyvqW3zn/V5te",
+      "full_name": "Anmol Sharma (Owner)",
+      "mobile": "+91 98765 43210",
+      "role": "owner",
+      "permissions": "[\"all\"]",
+      "created_at": "2026-10-02T15:55:14.100Z"
+    },
+    {
+      "id": 2,
+      "email": "manager@anmolvideography.com",
+      "password_hash": "$2a$10$K3ygSJREtXpIQde5PVNZgOVEevp7/RxBDgrlOX/5KPP2TQhr.xY66",
+      "full_name": "Rajesh Kumar (Studio Manager)",
+      "mobile": "+91 98765 43211",
+      "role": "manager",
+      "permissions": "[\"bookings\",\"customers\",\"schedule\",\"deliveries\"]",
+      "created_at": "2026-10-02T15:55:14.103Z"
+    },
+    {
+      "id": 3,
+      "email": "priya.verma@gmail.com",
+      "password_hash": "$2a$10$K3ygSJREtXpIQde5PVNZgOO8dNdUKXiBxUOLrEfZq4iKdi/qB7T8e",
+      "full_name": "Priya & Rahul Verma",
+      "mobile": "+91 98123 45678",
+      "role": "customer",
+      "permissions": "[\"view_bookings\"]",
+      "created_at": "2026-10-02T15:55:14.103Z"
+    }
+  ],
+  "studio_settings": [
+    {
+      "id": 1,
+      "name": "Anmol VideoGraphy",
+      "tagline": "Capturing Eternal Memories with Cinematic Elegance",
+      "email": "contact@anmolvideography.com",
+      "mobile": "+91 98765 43210",
+      "whatsapp_number": "+91 98765 43210",
+      "address": "101 Royal Wedding Square, Studio Road, City Center",
+      "cancellation_policy": "Cancellations before 30 days get 80% advance refund. Within 15-30 days gets 50% refund. Under 15 days, advance is non-refundable.",
+      "tax_rate": 18,
+      "advance_percentage": 30,
+      "manager_email": "manager@anmolvideography.com"
+    }
+  ],
+  "services": [
+    {
+      "id": 1,
+      "title": "Wedding Photography",
+      "category": "Photography",
+      "description": "Capture raw emotions, magical moments, and royal ritual portraits with our senior candid photographers.",
+      "starting_price": 25000,
+      "duration_hours": 8,
+      "image_url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+      "features_json": "[\"High-resolution candid photography\",\"Lighting setup\",\"Traditional ceremony portraits\",\"Color grading\"]",
+      "available_add_ons_json": "[\"Extra Photographer\",\"Same-day Slideshow Display\"]",
+      "created_at": "2026-10-02T15:55:14.108Z"
+    },
+    {
+      "id": 2,
+      "title": "Wedding Cinematography",
+      "category": "Videography",
+      "description": "Breathtaking 4K film production with cinema lenses, color grading, custom soundtrack design, and teaser trailers.",
+      "starting_price": 35000,
+      "duration_hours": 8,
+      "image_url": "https://images.unsplash.com/photo-1537633552985-df8429e8048b?auto=format&fit=crop&w=1200&q=80",
+      "features_json": "[\"4K Cinema Camera Rig\",\"Gimbal stabilization\",\"Audio recording rigs\",\"Color correction & sound mixing\"]",
+      "available_add_ons_json": "[\"Cinematic Reel (60s)\",\"Raw Footage HDD\"]",
+      "created_at": "2026-10-02T15:55:14.108Z"
+    },
+    {
+      "id": 3,
+      "title": "Pre-Wedding Cinematic Films",
+      "category": "Pre-Wedding",
+      "description": "Romantic story-driven pre-wedding films shot at scenic heritage resorts, beaches, or royal palaces.",
+      "starting_price": 30000,
+      "duration_hours": 10,
+      "image_url": "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80",
+      "features_json": "[\"Storyboarding & Concept Design\",\"Drone shots included\",\"3 Outfit changes\",\"Teaser trailer\"]",
+      "available_add_ons_json": "[\"Make-up artist\",\"Props package\"]",
+      "created_at": "2026-10-02T15:55:14.109Z"
+    },
+    {
+      "id": 4,
+      "title": "Drone Photography & Videography",
+      "category": "Aerial",
+      "description": "Stunning 4K aerial drone coverage capturing venue splendour, grand baraat entries, and outdoor aesthetics.",
+      "starting_price": 15000,
+      "duration_hours": 4,
+      "image_url": "https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=1200&q=80",
+      "features_json": "[\"Licensed Drone Operator\",\"4K HDR Video\",\"High-altitude panoramic venue shots\"]",
+      "available_add_ons_json": "[\"Dual Drone Setup\",\"Night flight permits\"]",
+      "created_at": "2026-10-02T15:55:14.110Z"
+    },
+    {
+      "id": 5,
+      "title": "Wedding Live Streaming",
+      "category": "Streaming",
+      "description": "Seamless multi-camera YouTube / Zoom / Private Web streaming for family and friends watching globally.",
+      "starting_price": 18000,
+      "duration_hours": 6,
+      "image_url": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80",
+      "features_json": "[\"Multi-Cam Audio Switcher\",\"High-speed 5G bonded internet\",\"Private protected link\"]",
+      "available_add_ons_json": "[\"Interactive Guest Chat\",\"Full Recording Archive\"]",
+      "created_at": "2026-10-02T15:55:14.110Z"
+    },
+    {
+      "id": 6,
+      "title": "LED Wall & Screen Services",
+      "category": "Display",
+      "description": "Ultra-HD P3 LED video walls for live event display, Baraat streams, and instant photo slide playback.",
+      "starting_price": 22000,
+      "duration_hours": 6,
+      "image_url": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80",
+      "features_json": "[\"8x12 ft P3 HD LED Screen\",\"Live Video Switcher\",\"Technician on-site\"]",
+      "available_add_ons_json": "[\"Additional LED screens\",\"Custom visual animations\"]",
+      "created_at": "2026-10-02T15:55:14.111Z"
+    }
+  ],
+  "packages": [
+    {
+      "id": 1,
+      "name": "Bronze Package",
+      "badge": "Starter Choice",
+      "price": 49999,
+      "original_price": 65000,
+      "description": "Essential wedding photography coverage perfect for intimate ceremonies and traditional rituals.",
+      "coverage_hours": 8,
+      "included_services_json": "[\"1 Lead Traditional Photographer\",\"1 Traditional Videographer\",\"Full High-Res Digital Photo Collection\"]",
+      "features_json": "[\"Single day coverage (up to 8 hours)\",\"1 Traditional HD Videographer\",\"1 Senior Photographer\",\"Standard color correction & editing\",\"300+ edited high-resolution photos\",\"Full HD highlights video (20-30 mins)\",\"1 Standard Premium Photo Album (40 pages)\",\"Digital Delivery via Cloud Portal\"]",
+      "is_customizable": 1,
+      "status": "active",
+      "created_at": "2026-10-02T15:55:14.105Z"
+    },
+    {
+      "id": 2,
+      "name": "Silver Package",
+      "badge": "Popular",
+      "price": 89999,
+      "original_price": 115000,
+      "description": "Comprehensive multi-event coverage capturing vibrant pre-wedding and main wedding rituals.",
+      "coverage_hours": 16,
+      "included_services_json": "[\"1 Candid Photographer\",\"1 Traditional Photographer\",\"1 Cinematic Videographer\",\"Drone Coverage (1 Event)\"]",
+      "features_json": "[\"2 Days Event Coverage (Haldi/Mehendi + Wedding)\",\"1 Candid & 1 Traditional Photographer\",\"1 Cinematic Videographer\",\"4K Aerial Drone Cinematography (1 session)\",\"500+ retouched master photos\",\"3-5 min Cinematic Teaser Film\",\"Full length 45-min Wedding Documentary\",\"2 Canvera Glass Cover Photo Albums (80 pages total)\",\"High-Speed USB Drive + Cloud Gallery\"]",
+      "is_customizable": 1,
+      "status": "active",
+      "created_at": "2026-10-02T15:55:14.106Z"
+    },
+    {
+      "id": 3,
+      "name": "Gold Package",
+      "badge": "Recommended",
+      "price": 149999,
+      "original_price": 185000,
+      "description": "Luxury wedding package including pre-wedding shoot, candid cinematography, and custom teaser trailers.",
+      "coverage_hours": 24,
+      "included_services_json": "[\"2 Candid Photographers\",\"2 Cinematic Videographers\",\"Pre-Wedding Shoot\",\"Drone Operator\",\"Luxury Flush Mount Album\"]",
+      "features_json": "[\"3 Days Coverage (Pre-wedding + Sangeet + Wedding + Reception)\",\"Pre-Wedding Outdoor Cinematic Shoot (1 Full Day)\",\"2 Senior Candid Photographers + 1 Traditional Photographer\",\"2 Senior Cinematic Cinematographers\",\"Dual 4K Drone Aerial Shoots (Sangeet & Wedding)\",\"800+ retouched raw & retouched photos\",\"Instagram Reel / 60-Sec Teaser Trailer\",\"4-7 min Premium Cinematic Wedding Film\",\"2 Luxury Hardcover Flush Mount Photo Albums\",\"1 Custom Framed Canvas (24x36 inch)\",\"Live Streaming Setup capability\"]",
+      "is_customizable": 1,
+      "status": "active",
+      "created_at": "2026-10-02T15:55:14.106Z"
+    },
+    {
+      "id": 4,
+      "name": "Diamond Package",
+      "badge": "Royal Experience",
+      "price": 249999,
+      "original_price": 300000,
+      "description": "The pinnacle of royal wedding visual storytelling. Unrestricted coverage with full crew, cranes, live stream & VIP albums.",
+      "coverage_hours": 40,
+      "included_services_json": "[\"Full Master Crew (6 Members)\",\"Jimmy Jib Crane\",\"4K Live Streaming\",\"VIP Velvet Photo Albums\",\"LED Wall Integration\"]",
+      "features_json": "[\"Unlimited 4-5 Days Complete Destination Coverage\",\"Exclusive Pre-Wedding Film Shoot at Luxury Location\",\"Master Crew: 3 Candid Photographers, 2 Cinematographers, 1 Crane Operator\",\"Jimmy Jib Crane Camera & Dual 4K Drones\",\"Full HD Multi-Cam Live Streaming for NRI Guests\",\"1200+ Master Edited Photographs with High Retouching\",\"Exclusive 4K Cinematic Feature Film (10-15 mins)\",\"3 Velvet Leather Luxury Albums + 2 Mini Parent Albums\",\"2 Customized LED Acrylic Frames (30x40 inch)\",\"Priority Delivery within 21 Days\"]",
+      "is_customizable": 1,
+      "status": "active",
+      "created_at": "2026-10-02T15:55:14.107Z"
+    }
+  ],
+  "add_ons": [
+    {
+      "id": 1,
+      "name": "4K Aerial Drone Coverage",
+      "category": "Aerial",
+      "price": 15000,
+      "unit_name": "per event",
+      "description": "4K aerial drone pilot for venue and Baraat"
+    },
+    {
+      "id": 2,
+      "name": "Extra Senior Candid Photographer",
+      "category": "Staff",
+      "price": 12000,
+      "unit_name": "per day",
+      "description": "Dedicated candid photographer for bride/groom side"
+    },
+    {
+      "id": 3,
+      "name": "Extra Cinematic Videographer",
+      "category": "Staff",
+      "price": 15000,
+      "unit_name": "per day",
+      "description": "Additional cinema operator with prime lenses"
+    },
+    {
+      "id": 4,
+      "name": "Jimmy Jib Crane Camera Setup",
+      "category": "Equipment",
+      "price": 20000,
+      "unit_name": "per event",
+      "description": "24-ft crane setup for grand stage and Baraat coverage"
+    },
+    {
+      "id": 5,
+      "name": "Luxury Velvet Canvera Album (40 Pages)",
+      "category": "Deliverable",
+      "price": 10000,
+      "unit_name": "per album",
+      "description": "Handmade flush mount album with metallic prints"
+    },
+    {
+      "id": 6,
+      "name": "Custom Framed Canvas (24x36 inch)",
+      "category": "Deliverable",
+      "price": 6000,
+      "unit_name": "per frame",
+      "description": "Archival matte canvas frame with gold trim"
+    },
+    {
+      "id": 7,
+      "name": "60-Second Instagram Reel / Teaser",
+      "category": "Digital",
+      "price": 5000,
+      "unit_name": "per video",
+      "description": "Fast turnaround vertical teaser within 48 hours"
+    },
+    {
+      "id": 8,
+      "name": "Multi-Cam 4K Live Streaming",
+      "category": "Streaming",
+      "price": 18000,
+      "unit_name": "per day",
+      "description": "Live web stream for NRI friends and family"
+    }
+  ],
+  "bookings": [
+    {
+      "id": 1,
+      "booking_ref": "AV-2026-1001",
+      "customer_id": 3,
+      "customer_name": "Priya & Rahul Verma",
+      "customer_email": "priya.verma@gmail.com",
+      "customer_mobile": "+91 98123 45678",
+      "event_type": "Wedding",
+      "package_id": 3,
+      "package_name": "Gold Package",
+      "event_date": "2026-11-15",
+      "event_start_time": "16:00",
+      "event_end_time": "23:00",
+      "venue": "The Taj Palace Grand Ballroom",
+      "city": "New Delhi",
+      "guest_count": 450,
+      "special_requirements": "Focus on candid moments during Varmala and Sangeet performances.",
+      "total_amount": 149999,
+      "advance_amount": 45000,
+      "remaining_amount": 104999,
+      "payment_status": "advance_paid",
+      "booking_status": "confirmed",
+      "created_at": "2026-10-02T15:55:14.126Z"
+    },
+    {
+      "id": 2,
+      "booking_ref": "AV-2026-1002",
+      "customer_id": null,
+      "customer_name": "Vikram & Ananya Mehta",
+      "customer_email": "ananya.m@outlook.com",
+      "customer_mobile": "+91 97788 99000",
+      "event_type": "Pre-wedding",
+      "package_id": 2,
+      "package_name": "Silver Package",
+      "event_date": "2026-10-25",
+      "event_start_time": "09:00",
+      "event_end_time": "18:00",
+      "venue": "Neemrana Fort Palace",
+      "city": "Alwar",
+      "guest_count": 20,
+      "special_requirements": "Sunset aerial drone shots near the fort ramparts.",
+      "total_amount": 89999,
+      "advance_amount": 0,
+      "remaining_amount": 89999,
+      "payment_status": "pending",
+      "booking_status": "pending",
+      "created_at": "2026-10-02T15:55:14.127Z"
+    }
+  ],
+  "booking_items": [],
+  "booking_status_history": [
+    {
+      "id": 1,
+      "booking_id": 1,
+      "status": "confirmed",
+      "notes": "Advance payment of ₹45,000 received via Razorpay UPI.",
+      "changed_by_name": "Rajesh Kumar",
+      "created_at": "2026-10-02T15:55:14.128Z"
+    }
+  ],
+  "availability_blocks": [],
+  "payments": [
+    {
+      "id": 1,
+      "payment_ref": "PAY-2026-8891",
+      "booking_id": 1,
+      "amount": 45000,
+      "payment_method": "razorpay",
+      "payment_type": "advance",
+      "razorpay_order_id": "order_RZP_1001",
+      "razorpay_payment_id": "pay_RZP_998877",
+      "razorpay_signature": "success",
+      "status": "30% Advance deposit payment",
+      "notes": null,
+      "transaction_date": "2026-10-02T15:55:14.129Z"
+    }
+  ],
+  "invoices": [],
+  "quotations": [],
+  "staff": [
+    {
+      "id": 1,
+      "name": "Amit Sharma",
+      "email": "amit@anmolvideography.com",
+      "mobile": "+91 98222 11100",
+      "role": "Photographer",
+      "skills_json": "[\"Candid\",\"Portrait\",\"Lighting\"]",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "name": "Rohan Gupta",
+      "email": "rohan@anmolvideography.com",
+      "mobile": "+91 98222 11101",
+      "role": "Videographer",
+      "skills_json": "[\"Cinematography\",\"Gimbal\",\"Coloring\"]",
+      "status": "active"
+    },
+    {
+      "id": 3,
+      "name": "Vikas Singh",
+      "email": "vikas@anmolvideography.com",
+      "mobile": "+91 98222 11102",
+      "role": "Drone Operator",
+      "skills_json": "[\"DJI Mavic 3 Pro\",\"FPV\"]",
+      "status": "active"
+    },
+    {
+      "id": 4,
+      "name": "Neha Kapoor",
+      "email": "neha@anmolvideography.com",
+      "mobile": "+91 98222 11103",
+      "role": "Editor",
+      "skills_json": "[\"DaVinci Resolve\",\"Premiere Pro\",\"Photoshop\"]",
+      "status": "active"
+    },
+    {
+      "id": 5,
+      "name": "Sanjay Patel",
+      "email": "sanjay@anmolvideography.com",
+      "mobile": "+91 98222 11104",
+      "role": "Album Designer",
+      "skills_json": "[\"Flush Mount Design\",\"Photoshop\"]",
+      "status": "active"
+    }
+  ],
+  "staff_assignments": [],
+  "equipment": [
+    {
+      "id": 1,
+      "asset_id": "CAM-001",
+      "name": "Sony FX3 Cinema Camera",
+      "category": "Mirrorless Cameras",
+      "quantity": 3,
+      "condition": "excellent",
+      "availability": "available",
+      "purchase_date": "2025-01-15",
+      "notes": "Full-frame 4K 120fps cinema rig"
+    },
+    {
+      "id": 2,
+      "asset_id": "CAM-002",
+      "name": "Sony A7 IV Body",
+      "category": "Mirrorless Cameras",
+      "quantity": 4,
+      "condition": "excellent",
+      "availability": "available",
+      "purchase_date": "2025-02-10",
+      "notes": "Primary candid photography body"
+    },
+    {
+      "id": 3,
+      "asset_id": "LENS-001",
+      "name": "Sony FE 70-200mm f/2.8 GM II",
+      "category": "Lenses",
+      "quantity": 2,
+      "condition": "excellent",
+      "availability": "available",
+      "purchase_date": "2025-03-01",
+      "notes": "Telephoto master lens"
+    },
+    {
+      "id": 4,
+      "asset_id": "DRONE-001",
+      "name": "DJI Mavic 3 Cine Combo",
+      "category": "Drones",
+      "quantity": 2,
+      "condition": "excellent",
+      "availability": "available",
+      "purchase_date": "2025-01-20",
+      "notes": "ProRes 4K aerial drone"
+    },
+    {
+      "id": 5,
+      "asset_id": "CRANE-001",
+      "name": "Proaim 24ft Jimmy Jib Crane",
+      "category": "Cranes",
+      "quantity": 1,
+      "condition": "good",
+      "availability": "available",
+      "purchase_date": "2024-11-10",
+      "notes": "Stage & Baraat crane setup"
+    },
+    {
+      "id": 6,
+      "asset_id": "LED-001",
+      "name": "P3 HD Outdoor LED Video Wall (8x12ft)",
+      "category": "LED screens",
+      "quantity": 1,
+      "condition": "excellent",
+      "availability": "available",
+      "purchase_date": "2024-12-05",
+      "notes": "High brightness live screen display"
+    }
+  ],
+  "inventory": [
+    {
+      "id": 1,
+      "name": "Canvera Velvet Flush Mount Album Box",
+      "category": "album",
+      "stock": 45,
+      "price": 4500,
+      "supplier": "Canvera India"
+    },
+    {
+      "id": 2,
+      "name": "Gold Trim Wooden Canvas Frame (24x36)",
+      "category": "photo_frame",
+      "stock": 30,
+      "price": 2500,
+      "supplier": "Royal Frames Delhi"
+    },
+    {
+      "id": 3,
+      "name": "Digital Royal Laser-Cut Invitation Cards",
+      "category": "invitation_card",
+      "stock": 500,
+      "price": 120,
+      "supplier": "PrintCraft Studio"
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "booking_id": 2,
+      "title": "New Booking Request Received!",
+      "message": "Vikram & Ananya Mehta submitted a request for Silver Package on Oct 25, 2026.",
+      "type": "new_booking",
+      "is_read": 0,
+      "payload_json": "{\"booking_ref\":\"AV-2026-1002\",\"customer_name\":\"Vikram & Ananya Mehta\",\"amount\":89999}",
+      "created_at": "2026-10-02T15:55:14.130Z"
+    }
+  ],
+  "notification_deliveries": [
+    {
+      "id": 1,
+      "notification_id": 1,
+      "channel": "email",
+      "recipient": "manager@anmolvideography.com",
+      "status": "delivered",
+      "delivered_at": "2026-10-02T15:55:14.130Z"
+    },
+    {
+      "id": 2,
+      "notification_id": 1,
+      "channel": "whatsapp",
+      "recipient": "+91 98765 43210",
+      "status": "delivered",
+      "delivered_at": "2026-10-02T15:55:14.131Z"
+    }
+  ],
+  "inquiries": [],
+  "reviews": [
+    {
+      "id": 1,
+      "booking_id": 1,
+      "customer_name": "Karan & Meera Kapoor",
+      "event_type": "Royal Wedding",
+      "rating": 5,
+      "title": "Unforgettable Cinematic Experience!",
+      "comment": "Anmol VideoGraphy turned our wedding into a Bollywood movie. The drone shots during our Varmala were breathtaking. Highly recommended!",
+      "image_url": "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80",
+      "status": "approved",
+      "is_featured": 1,
+      "reply": "Thank you Karan & Meera! It was a delight capturing your special day!",
+      "created_at": "2026-10-02T15:55:14.132Z"
+    }
+  ],
+  "coupons": [
+    {
+      "id": 1,
+      "code": "ROYALWEDDING10",
+      "discount_type": "percentage",
+      "discount_value": 10,
+      "min_booking_value": 50000,
+      "start_date": "2026-01-01",
+      "expiry_date": "2026-12-31",
+      "max_uses": 50,
+      "current_uses": 5,
+      "is_active": 1
+    },
+    {
+      "id": 2,
+      "code": "FESTIVE5000",
+      "discount_type": "fixed",
+      "discount_value": 5000,
+      "min_booking_value": 40000,
+      "start_date": "2026-09-01",
+      "expiry_date": "2026-11-30",
+      "max_uses": 20,
+      "current_uses": 2,
+      "is_active": 1
+    }
+  ],
+  "media_deliveries": [],
+  "audit_logs": []
+}
