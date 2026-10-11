@@ -18,7 +18,8 @@ function makeCode() {
     return String(crypto.randomInt(100000, 1000000)); // 6 digits
 }
 
-const fast2smsReady = () => !!process.env.FAST2SMS_API_KEY;
+const fast2smsReady = () => !!(process.env.FAST2SMS_API_KEY || process.env.Fast2SMS_API_KEY);
+const getFast2smsKey = () => process.env.FAST2SMS_API_KEY || process.env.Fast2SMS_API_KEY;
 const smsReady = () => process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_FROM;
 const emailReady = () => process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS;
 
@@ -29,10 +30,12 @@ async function sendSms(mobile, code) {
 
     // Option 1: Fast2SMS (Indian SMS gateway)
     if (fast2smsReady()) {
-        const response = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+        const apiKey = getFast2smsKey();
+        // First try OTP route
+        let response = await fetch('https://www.fast2sms.com/dev/bulkV2', {
             method: 'POST',
             headers: {
-                'authorization': process.env.FAST2SMS_API_KEY,
+                'authorization': apiKey,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -41,9 +44,35 @@ async function sendSms(mobile, code) {
                 numbers: cleanTen
             })
         });
-        const resData = await response.json();
+        let resData = await response.json();
         if (resData.return) return true;
+
+        // If status_code 996 (domain verification pending on Fast2SMS OTP route), try Quick route 'q'
+        if (resData.status_code === 996 || !resData.return) {
+            response = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+                method: 'POST',
+                headers: {
+                    'authorization': apiKey,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    route: 'q',
+                    message: `Your Anmol VideoGraphy OTP is ${code}. Valid for 5 minutes.`,
+                    language: 'english',
+                    numbers: cleanTen
+                })
+            });
+            resData = await response.json();
+            if (resData.return) return true;
+        }
+
         console.error('Fast2SMS error:', resData);
+        if (resData.status_code === 999) {
+            throw new Error('Fast2SMS: Please recharge minimum ₹100 in Fast2SMS wallet to activate API SMS delivery.');
+        }
+        if (resData.status_code === 996) {
+            throw new Error('Fast2SMS: Please verify website in Fast2SMS OTP menu or recharge ₹100.');
+        }
         throw new Error(resData.message || 'Could not send SMS via Fast2SMS');
     }
 
