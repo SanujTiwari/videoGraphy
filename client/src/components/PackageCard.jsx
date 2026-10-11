@@ -13,43 +13,57 @@ export function formatPrice(amount) {
   return '₹' + Number(amount).toLocaleString('en-IN');
 }
 
-// Final price text. Gold has a range (price to price_max), others have one price.
+// Exact final price formatted in Indian currency
 export function getFinalPrice(pkg) {
-  if (pkg.price_max) {
-    return formatPrice(pkg.price) + ' – ' + formatPrice(pkg.price_max);
-  }
   return formatPrice(pkg.price);
 }
 
 // Price, discount badge and "After Discount" label.
-// The crossed-out price and "SAVE" only show if the package has them in the data.
+// The crossed-out price and "SAVE" only show if an active discount exists.
 function PriceBox({ pkg, isDark }) {
-  const hasOriginalPrice = pkg.original_price && pkg.original_price > pkg.price;
-  const savedAmount = hasOriginalPrice ? pkg.original_price - pkg.price : pkg.discount_amount;
+  const hasActiveDiscount = Boolean(
+    pkg.is_discount_active ||
+    (pkg.discount_enabled !== 0 && pkg.original_price && pkg.original_price > pkg.price)
+  );
+  const savedAmount = hasActiveDiscount ? (pkg.discount_amount || (pkg.original_price - pkg.price)) : 0;
+  const discountPercent = hasActiveDiscount ? (pkg.discount_percent || Math.round((savedAmount / pkg.original_price) * 100)) : 0;
 
   return (
     <div className="text-center">
-      <span className="inline-block text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-gold-400 text-gold-500 bg-gold-400/10">
-        Discount
-      </span>
-
-      {hasOriginalPrice && (
-        <div className="mt-3 text-sm line-through text-charcoal-400">{formatPrice(pkg.original_price)}</div>
+      {hasActiveDiscount && (
+        <span className="inline-block text-[10px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-gold-400 text-gold-500 bg-gold-400/10">
+          Special Offer
+        </span>
       )}
 
-      <div className={'mt-3 font-serif text-3xl sm:text-4xl font-bold ' + (isDark ? 'text-gold-300' : 'text-charcoal-900')}>
-        {getFinalPrice(pkg)}
-      </div>
-      <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-500">After Discount</div>
-
-      {savedAmount > 0 && (
-        <div className="mt-2 inline-block text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-          SAVE {formatPrice(savedAmount)}
+      {hasActiveDiscount && pkg.original_price && (
+        <div className="mt-2 text-sm line-through text-charcoal-400 font-medium">
+          {formatPrice(pkg.original_price)}
         </div>
       )}
-      {pkg.discount_percent > 0 && (
-        <div className="mt-2 ml-2 inline-block text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-          {pkg.discount_percent}% OFF
+
+      <div className={'mt-2 font-serif text-3xl sm:text-4xl font-bold ' + (isDark ? 'text-gold-300' : 'text-charcoal-900')}>
+        {getFinalPrice(pkg)}
+      </div>
+      
+      {hasActiveDiscount && (
+        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-500 mt-0.5">
+          Final Discounted Price
+        </div>
+      )}
+
+      {hasActiveDiscount && (
+        <div className="mt-2.5 flex flex-wrap items-center justify-center gap-1.5">
+          {savedAmount > 0 && (
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full">
+              SAVE {formatPrice(savedAmount)}
+            </span>
+          )}
+          {discountPercent > 0 && (
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full">
+              {discountPercent}% OFF
+            </span>
+          )}
         </div>
       )}
     </div>
@@ -141,7 +155,7 @@ function PackageCard({ pkg, onViewDetails }) {
   if (isDiamond) label = 'Ultimate Package';
 
   function handleBookNow() {
-    openWizard(pkg.id, pkg.name, pkg.price, { price_max: pkg.price_max, features: pkg.features });
+    openWizard(pkg.id, pkg.name, pkg.price, { features: pkg.features });
   }
 
   return (
@@ -200,7 +214,7 @@ function PackageDetailsModal({ pkg, onClose }) {
 
   function handleBookNow() {
     onClose();
-    openWizard(pkg.id, pkg.name, pkg.price, { price_max: pkg.price_max, features: pkg.features });
+    openWizard(pkg.id, pkg.name, pkg.price, { features: pkg.features });
   }
 
   return (
