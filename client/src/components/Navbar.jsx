@@ -438,7 +438,9 @@ export const Navbar = () => {
               <img
                 src="/whatsapp.png"
                 alt="WhatsApp"
-                className="whatsapp-icon-image"
+                width="28"
+                height="28"
+                className="w-7 h-7 max-w-7 max-h-7 object-contain relative z-10"
               />
 
             </a>
@@ -734,48 +736,34 @@ export const Navbar = () => {
 
           {/* MOBILE CTA */}
 
-          <div className="mt-5 pt-4 border-t border-blue-100 flex flex-col gap-3">
+          <div className="mt-5 pt-4 border-t border-blue-100 flex flex-col gap-2.5">
 
             {/* BOOK NOW FIRST */}
-
             <button
               type="button"
               onClick={handleMobileBookNow}
-              className="book-now-btn w-full"
+              className="w-full py-3.5 px-4 rounded-xl gold-gradient-bg text-white font-bold text-sm shadow-md tracking-wider uppercase transition-all flex items-center justify-center gap-2 active:scale-95"
             >
-
-              <span className="book-now-shine pointer-events-none absolute inset-0"></span>
-
-              <span className="book-now-inner-glow pointer-events-none absolute inset-0 rounded-full"></span>
-
-              <span className="relative z-10">
-                Book Now
-              </span>
-
+              <span>Book Now</span>
             </button>
 
-
             {/* WHATSAPP SECOND */}
-
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               onClick={closeMobileMenu}
-              className="whatsapp-mobile-button"
+              className="w-full h-12 flex items-center justify-center gap-2.5 px-4 rounded-xl bg-[#00c853] hover:bg-[#00b84f] text-white font-semibold text-sm shadow-md transition-all active:scale-95"
               aria-label="Chat on WhatsApp"
             >
-
               <img
                 src="/whatsapp.png"
                 alt="WhatsApp"
-                className="whatsapp-mobile-image"
+                width="22"
+                height="22"
+                className="w-[22px] h-[22px] max-w-[22px] max-h-[22px] object-contain shrink-0"
               />
-
-              <span>
-                Chat on WhatsApp
-              </span>
-
+              <span>Chat on WhatsApp</span>
             </a>
 
           </div>
