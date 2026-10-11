@@ -1279,6 +1279,66 @@ header .max-w-\[1450px\] {
 }
 
 
+
+/* =========================================================
+   OTP BOX SYSTEM (Matches Images 2, 3, 4)
+   ========================================================= */
+
+@keyframes otpShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-7px); }
+  40%, 80% { transform: translateX(7px); }
+}
+
+.animate-otp-shake {
+  animation: otpShake 0.45s ease-in-out;
+}
+
+.otp-digit-box {
+  width: 48px;
+  height: 56px;
+  background-color: #f4f5f7;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+@media (max-width: 420px) {
+  .otp-digit-box {
+    width: 40px;
+    height: 50px;
+    border-radius: 11px;
+    font-size: 1.1rem;
+  }
+}
+
+.otp-digit-box:focus {
+  background-color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.18);
+  transform: translateY(-1px);
+}
+
+.otp-digit-box.otp-box-error {
+  border-color: #ef4444 !important;
+  color: #dc2626 !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+}
+
+.otp-digit-box.otp-box-success {
+  border-color: #22c55e !important;
+  color: #16a34a !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15) !important;
+}
+
 /* =========================================================
    REDUCED MOTION
    ========================================================= */
@@ -1289,7 +1349,8 @@ header .max-w-\[1450px\] {
   .book-now-shine,
   .book-now-inner-glow,
   .whatsapp-icon-button,
-  .whatsapp-icon-shine {
+  .whatsapp-icon-shine,
+  .animate-otp-shake {
     animation: none !important;
   }
 
