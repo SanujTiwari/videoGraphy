@@ -99,7 +99,14 @@ async function migrateAvailabilitySchema() {
     await insertEq.run('AUDIO-01', 'Rode Wireless PRO Dual Mic System', 'audio', 2, 'Vows & Ritual Audio Capture');
   }
 
-  console.log('✅ Availability and Resource Schema migration completed successfully!');
+  // 9. Gallery photos media support & Cloudinary settings
+  await db.prepare("ALTER TABLE gallery_photos ADD COLUMN IF NOT EXISTS media_type TEXT DEFAULT 'image'").run();
+  await db.prepare("ALTER TABLE gallery_photos ADD COLUMN IF NOT EXISTS public_id TEXT").run();
+  await db.prepare("ALTER TABLE studio_settings ADD COLUMN IF NOT EXISTS cloudinary_cloud_name TEXT").run();
+  await db.prepare("ALTER TABLE studio_settings ADD COLUMN IF NOT EXISTS cloudinary_api_key TEXT").run();
+  await db.prepare("ALTER TABLE studio_settings ADD COLUMN IF NOT EXISTS cloudinary_api_secret TEXT").run();
+
+  console.log('✅ Availability, Resource, and Cloudinary Media Schema migration completed successfully!');
 }
 
 if (require.main === module) {

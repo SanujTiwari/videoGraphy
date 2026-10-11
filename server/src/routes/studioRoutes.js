@@ -32,4 +32,17 @@ router.get('/audit-logs', authenticateToken, requireRole(['owner']), async (_req
     return res.json({ audit_logs: logs });
 });
 
+// PATCH /api/studio/cloudinary - Update Cloudinary credentials directly from Admin Settings
+router.patch('/cloudinary', authenticateToken, requireRole(['owner', 'manager']), async (req, res) => {
+    const { cloud_name, api_key, api_secret } = req.body;
+    await db.prepare(`
+        UPDATE studio_settings
+        SET cloudinary_cloud_name = ?,
+            cloudinary_api_key = ?,
+            cloudinary_api_secret = ?
+        WHERE id = 1
+    `).run(cloud_name ? cloud_name.trim() : null, api_key ? api_key.trim() : null, api_secret ? api_secret.trim() : null);
+    return res.json({ message: 'Cloudinary storage credentials saved successfully!' });
+});
+
 module.exports = router;

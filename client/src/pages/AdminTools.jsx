@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { apiRequest, SERVER_URL } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { Cloud, Upload, Trash2, Video, Image, Check, AlertCircle, Play, Key } from 'lucide-react';
 
 // Admin tools used by AdminDashboard: chart, rates, photos, availability, settings.
 const money = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
@@ -93,71 +94,291 @@ export const PackageRates = () => {
 };
 
 // ---------- Photos ----------
+// ---------- Media & Gallery (Cloudinary Integration) ----------
 export const Photos = () => {
     const [photos, setPhotos] = useState([]);
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('Wedding');
+    const [mediaType, setMediaType] = useState('image'); // 'image' | 'video'
     const [file, setFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
     const [message, setMessage] = useState('');
+    const [storageStatus, setStorageStatus] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState('All');
     const [busy, setBusy] = useState(false);
 
-    const load = () => apiRequest('/gallery').then((d) => setPhotos(d.photos || [])).catch(() => {});
+    const load = () => {
+        apiRequest('/gallery').then((d) => setPhotos(d.photos || [])).catch(() => {});
+        apiRequest('/gallery/storage-status').then(setStorageStatus).catch(() => {});
+    };
+
     useEffect(() => { load(); }, []);
+
+    const handleFileChange = (e) => {
+        const selected = e.target.files[0];
+        if (!selected) {
+            setFile(null);
+            setPreviewUrl(null);
+            return;
+        }
+
+        // Auto detect media type
+        if (selected.type.startsWith('video/')) {
+            setMediaType('video');
+        } else {
+            setMediaType('image');
+        }
+
+        setFile(selected);
+        setPreviewUrl(URL.createObjectURL(selected));
+    };
 
     const upload = (e) => {
         e.preventDefault();
-        if (!file) return setMessage('Please choose a photo');
+        if (!file) return setMessage('Please select a photo or video to upload.');
         setBusy(true);
         setMessage('');
-        // Convert the photo to text (data URL) so it can be sent as JSON
+
         const reader = new FileReader();
         reader.onload = async () => {
             try {
-                await apiRequest('/gallery/admin', { method: 'POST', body: JSON.stringify({ title, category, image_data: reader.result }) });
+                const res = await apiRequest('/gallery/admin', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        title,
+                        category,
+                        media_type: mediaType,
+                        image_data: reader.result
+                    })
+                });
                 setTitle('');
                 setFile(null);
+                setPreviewUrl(null);
                 e.target.reset();
-                setMessage('Photo added ✓');
+                setMessage(res.message || 'Media uploaded successfully.');
                 load();
             } catch (err) {
-                setMessage(err.message);
+                setMessage(err.message || 'Upload failed.');
+            } finally {
+                setBusy(false);
             }
-            setBusy(false);
         };
         reader.readAsDataURL(file);
     };
 
-    const remove = async (id) => {
-        if (!window.confirm('Delete this photo?')) return;
-        await apiRequest(`/gallery/admin/${id}`, { method: 'DELETE' });
-        load();
+    const remove = async (id, itemTitle) => {
+        if (!window.confirm(`Are you sure you want to delete "${itemTitle}"? This will permanently remove it from storage.`)) return;
+        try {
+            await apiRequest(`/gallery/admin/${id}`, { method: 'DELETE' });
+            load();
+        } catch (err) {
+            alert(err.message || 'Failed to delete');
+        }
     };
 
-    return (<div className="space-y-6">
-      <form onSubmit={upload} className={`${box} grid md:grid-cols-4 gap-3 items-end`}>
-        <input required className={input} placeholder="Photo title" value={title} onChange={(e) => setTitle(e.target.value)}/>
-        <select className={input} value={category} onChange={(e) => setCategory(e.target.value)}>
-          {['Wedding', 'Pre-wedding', 'Haldi', 'Mehendi', 'Reception', 'Drone'].map((c) => <option key={c}>{c}</option>)}
-        </select>
-        <input required type="file" accept="image/jpeg,image/png,image/webp" className={input} onChange={(e) => setFile(e.target.files[0])}/>
-        <button disabled={busy} className={button}>{busy ? 'Uploading...' : 'Add photo'}</button>
-        {message && <p className="md:col-span-4 text-sm text-charcoal-600">{message}</p>}
-      </form>
+    const CATEGORIES = ['Wedding', 'Haldi', 'Mehendi', 'Pre-wedding', 'Reception', 'Drone / Films'];
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {photos.map((p) => (<div key={p.id} className="bg-white border border-gold-300/40 rounded-2xl overflow-hidden">
-            <img src={SERVER_URL + p.image_url} alt={p.title} className="h-40 w-full object-cover"/>
-            <div className="p-3 flex justify-between items-center gap-2">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold truncate">{p.title}</p>
-                <p className="text-xs text-charcoal-500">{p.category}</p>
-              </div>
-              <button onClick={() => remove(p.id)} className="text-xs text-red-600 hover:underline">Delete</button>
+    const filteredPhotos = selectedCategory === 'All'
+        ? photos
+        : selectedCategory === 'Videos'
+        ? photos.filter(p => p.media_type === 'video')
+        : photos.filter(p => p.category === selectedCategory);
+
+    return (
+        <div className="space-y-6">
+            {/* Storage Status Header */}
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-white border border-gold-300/40 rounded-2xl p-4 shadow-xs">
+                <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        storageStatus?.isConfigured
+                            ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                            : 'bg-amber-50 text-amber-600 border border-amber-200'
+                    }`}>
+                        <Cloud className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-bold text-charcoal-900 flex items-center gap-2">
+                            Media Storage: {storageStatus?.isConfigured ? (
+                                <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 text-xs px-2 py-0.5 rounded-full font-semibold">
+                                    Cloudinary Active ({storageStatus.cloud_name})
+                                </span>
+                            ) : (
+                                <span className="text-amber-700 bg-amber-50 border border-amber-200 text-xs px-2 py-0.5 rounded-full font-semibold">
+                                    Local Storage (Setup Cloudinary in Settings)
+                                </span>
+                            )}
+                        </p>
+                        <p className="text-xs text-charcoal-500 mt-0.5">
+                            Photos and videos uploaded here appear immediately on the public Portfolio and homepage.
+                        </p>
+                    </div>
+                </div>
             </div>
-          </div>))}
-        {photos.length === 0 && <p className="text-sm text-charcoal-500">No photos uploaded yet.</p>}
-      </div>
-    </div>);
+
+            {/* Upload Form */}
+            <form onSubmit={upload} className={`${box} space-y-4`}>
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gold-200/60 pb-3">
+                    <h3 className="font-serif text-lg font-bold text-charcoal-900 flex items-center gap-2">
+                        <Upload className="w-4 h-4 text-gold-600" /> Upload New Photo or Video
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs">
+                        <label className="font-semibold text-charcoal-700">Type:</label>
+                        <div className="flex bg-gold-50 p-1 rounded-lg border border-gold-300/60">
+                            <button
+                                type="button"
+                                onClick={() => setMediaType('image')}
+                                className={`px-3 py-1 rounded font-semibold transition ${
+                                    mediaType === 'image' ? 'gold-gradient-bg text-white' : 'text-charcoal-600 hover:text-charcoal-900'
+                                }`}
+                            >
+                                Photo
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setMediaType('video')}
+                                className={`px-3 py-1 rounded font-semibold transition ${
+                                    mediaType === 'video' ? 'gold-gradient-bg text-white' : 'text-charcoal-600 hover:text-charcoal-900'
+                                }`}
+                            >
+                                Video
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+                    <div>
+                        <label className="text-xs font-semibold text-charcoal-700 block mb-1">Title</label>
+                        <input
+                            required
+                            className={input}
+                            placeholder="e.g. Royal Haldi Moments"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs font-semibold text-charcoal-700 block mb-1">Event Category</label>
+                        <select
+                            className={input}
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                        >
+                            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                    <div className="sm:col-span-2">
+                        <label className="text-xs font-semibold text-charcoal-700 block mb-1">
+                            Select File {mediaType === 'video' ? '(MP4, WebM, MOV)' : '(JPG, PNG, WEBP)'}
+                        </label>
+                        <input
+                            required
+                            type="file"
+                            accept={mediaType === 'video' ? 'video/mp4,video/webm,video/quicktime' : 'image/jpeg,image/png,image/webp'}
+                            className={input}
+                            onChange={handleFileChange}
+                        />
+                    </div>
+                </div>
+
+                {/* File Preview */}
+                {previewUrl && (
+                    <div className="p-3 bg-gold-50/40 border border-gold-200/60 rounded-xl flex items-center gap-4">
+                        <div className="w-20 h-20 rounded-lg overflow-hidden bg-black shrink-0 flex items-center justify-center">
+                            {mediaType === 'video' ? (
+                                <video src={previewUrl} className="w-full h-full object-cover" muted autoPlay loop />
+                            ) : (
+                                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                            )}
+                        </div>
+                        <div className="min-w-0 text-xs">
+                            <p className="font-semibold text-charcoal-900 truncate">{file?.name}</p>
+                            <p className="text-charcoal-500">{(file?.size / (1024 * 1024)).toFixed(2)} MB · {mediaType.toUpperCase()}</p>
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <button disabled={busy} className={button}>
+                        {busy ? 'Uploading to Storage...' : mediaType === 'video' ? 'Upload Video' : 'Upload Photo'}
+                    </button>
+                    {message && (
+                        <p className={`text-xs font-semibold ${message.toLowerCase().includes('failed') || message.toLowerCase().includes('error') ? 'text-red-600' : 'text-emerald-700'}`}>
+                            {message}
+                        </p>
+                    )}
+                </div>
+            </form>
+
+            {/* Filter Tabs & Gallery Count */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                <div className="flex flex-wrap gap-1.5 text-xs">
+                    {['All', 'Wedding', 'Haldi', 'Mehendi', 'Pre-wedding', 'Reception', 'Videos'].map((cat) => (
+                        <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setSelectedCategory(cat)}
+                            className={`px-3 py-1.5 rounded-full font-semibold border transition ${
+                                selectedCategory === cat
+                                    ? 'gold-gradient-bg text-white border-transparent'
+                                    : 'bg-white text-charcoal-700 border-gold-200 hover:bg-gold-50'
+                            }`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+                <span className="text-xs text-charcoal-500 font-medium">
+                    {filteredPhotos.length} media items
+                </span>
+            </div>
+
+            {/* Media Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredPhotos.map((p) => {
+                    const mediaSrc = p.image_url?.startsWith('http') ? p.image_url : (SERVER_URL + p.image_url);
+                    const isVideo = p.media_type === 'video';
+
+                    return (
+                        <div key={p.id} className="bg-white border border-gold-300/40 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition flex flex-col justify-between">
+                            <div className="relative h-44 bg-charcoal-900 flex items-center justify-center overflow-hidden">
+                                {isVideo ? (
+                                    <video src={mediaSrc} controls className="w-full h-full object-cover" />
+                                ) : (
+                                    <img src={mediaSrc} alt={p.title} className="w-full h-full object-cover" loading="lazy" />
+                                )}
+                                <span className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-charcoal-900/80 text-white backdrop-blur-xs flex items-center gap-1">
+                                    {isVideo ? <Video className="w-3 h-3 text-gold-400" /> : <Image className="w-3 h-3 text-gold-400" />}
+                                    {p.category}
+                                </span>
+                            </div>
+
+                            <div className="p-3.5 flex items-center justify-between gap-2 border-t border-gold-100">
+                                <div className="min-w-0">
+                                    <p className="text-xs font-bold text-charcoal-900 truncate">{p.title}</p>
+                                    <p className="text-[10px] text-charcoal-400">{isVideo ? 'Video Clip' : 'High-Res Photo'}</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => remove(p.id, p.title)}
+                                    title="Delete from gallery and Cloudinary"
+                                    className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-700 transition shrink-0"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {filteredPhotos.length === 0 && (
+                <div className="p-8 text-center bg-white border border-gold-200/60 rounded-2xl text-charcoal-400 text-xs">
+                    No media items found in this category. Upload photos or videos using the form above.
+                </div>
+            )}
+        </div>
+    );
 };
 
 // ---------- Availability ----------
@@ -262,10 +483,139 @@ const EmailChanger = ({ field, title, current }) => {
     </form>);
 };
 
+export const CloudinarySettings = () => {
+    const [cloudName, setCloudName] = useState('');
+    const [apiKey, setApiKey] = useState('');
+    const [apiSecret, setApiSecret] = useState('');
+    const [status, setStatus] = useState(null);
+    const [message, setMessage] = useState('');
+    const [busy, setBusy] = useState(false);
+
+    const load = async () => {
+        try {
+            const data = await apiRequest('/studio/settings');
+            const s = data.settings || {};
+            if (s.cloudinary_cloud_name) setCloudName(s.cloudinary_cloud_name);
+            if (s.cloudinary_api_key) setApiKey(s.cloudinary_api_key);
+            if (s.cloudinary_api_secret) setApiSecret(s.cloudinary_api_secret);
+            const st = await apiRequest('/gallery/storage-status');
+            setStatus(st);
+        } catch (err) {}
+    };
+
+    useEffect(() => { load(); }, []);
+
+    const save = async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        setMessage('');
+        try {
+            await apiRequest('/studio/cloudinary', {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    cloud_name: cloudName,
+                    api_key: apiKey,
+                    api_secret: apiSecret
+                })
+            });
+            setMessage('Cloudinary credentials saved successfully.');
+            load();
+        } catch (err) {
+            setMessage(err.message || 'Failed to save credentials.');
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    return (
+        <form onSubmit={save} className={`${box} lg:col-span-2 space-y-4`}>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gold-200/60 pb-3">
+                <div className="flex items-center gap-2">
+                    <Cloud className="w-5 h-5 text-gold-600" />
+                    <div>
+                        <h3 className="font-serif font-bold text-base text-charcoal-900">Cloudinary Cloud Storage Setup</h3>
+                        <p className="text-xs text-charcoal-500">Connect Cloudinary so all wedding photos &amp; videos upload to your cloud storage directly.</p>
+                    </div>
+                </div>
+                {status?.isConfigured ? (
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        Connected: {status.cloud_name}
+                    </span>
+                ) : (
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                        Not Configured (Using Local Storage)
+                    </span>
+                )}
+            </div>
+
+            <div className="grid sm:grid-cols-3 gap-4">
+                <div>
+                    <label className="text-xs font-semibold text-charcoal-700 block mb-1">Cloud Name</label>
+                    <input
+                        required
+                        className={input}
+                        placeholder="e.g. anmol-studio"
+                        value={cloudName}
+                        onChange={(e) => setCloudName(e.target.value)}
+                    />
+                </div>
+                <div>
+                    <label className="text-xs font-semibold text-charcoal-700 block mb-1">API Key</label>
+                    <input
+                        required
+                        className={input}
+                        placeholder="e.g. 123456789012345"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                    />
+                </div>
+                <div>
+                    <label className="text-xs font-semibold text-charcoal-700 block mb-1">API Secret</label>
+                    <input
+                        required
+                        type="password"
+                        className={input}
+                        placeholder="••••••••••••••••"
+                        value={apiSecret}
+                        onChange={(e) => setApiSecret(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            <div className="p-3.5 bg-gold-50/60 border border-gold-200 rounded-xl text-xs text-charcoal-700 space-y-1">
+                <p className="font-bold text-charcoal-900">How to get these credentials (Free &amp; Easy):</p>
+                <ol className="list-decimal list-inside space-y-0.5 text-charcoal-600">
+                    <li>Create a free account on <a href="https://cloudinary.com" target="_blank" rel="noreferrer" className="text-gold-700 underline font-semibold">cloudinary.com</a> (Free tier provides 25GB cloud storage).</li>
+                    <li>Go to your Cloudinary Dashboard and find <b>Cloud Name</b>, <b>API Key</b>, and <b>API Secret</b>.</li>
+                    <li>Paste them into the fields above and click Save. All media uploads and deletions will now sync directly with your Cloudinary cloud!</li>
+                </ol>
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+                <button disabled={busy} className={button}>
+                    {busy ? 'Saving...' : 'Save Cloudinary Credentials'}
+                </button>
+                {message && (
+                    <p className={`text-xs font-semibold ${message.includes('fail') ? 'text-red-600' : 'text-emerald-700'}`}>
+                        {message}
+                    </p>
+                )}
+            </div>
+        </form>
+    );
+};
+
 export const AdminSettings = () => {
     const { user } = useAuth();
-    return (<div className="grid lg:grid-cols-2 gap-6">
-      <EmailChanger field="email" title="Change admin email" current={user.email}/>
-      <EmailChanger field="backup_email" title="Backup email (can also be used to log in)" current={user.backup_email}/>
-    </div>);
+    return (
+        <div className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+                <EmailChanger field="email" title="Change admin email" current={user.email}/>
+                <EmailChanger field="backup_email" title="Backup email (can also be used to log in)" current={user.backup_email}/>
+            </div>
+            <div className="grid grid-cols-1">
+                <CloudinarySettings />
+            </div>
+        </div>
+    );
 };

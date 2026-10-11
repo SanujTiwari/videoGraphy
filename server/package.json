@@ -1,29 +1,30 @@
 {
-    "name":  "anmol-videography-server",
-    "version":  "1.0.0",
-    "description":  "Backend server for Anmol VideoGraphy Wedding Management Platform",
-    "main":  "src/index.js",
-    "scripts":  {
-                    "dev":  "node --watch src/index.js",
-                    "start":  "node src/index.js",
-                    "seed":  "node src/db/seed.js"
-                },
-    "dependencies":  {
-                         "@prisma/client":  "^7.10.0",
-                         "bcryptjs":  "^2.4.3",
-                         "cors":  "^2.8.5",
-                         "dotenv":  "^16.6.1",
-                         "express":  "^4.19.2",
-                         "express-async-errors":  "^3.1.1",
-                         "jsonwebtoken":  "^9.0.2",
-                         "multer":  "^1.4.5-lts.1",
-                         "nodemailer":  "^6.9.13",
-                         "pdfkit":  "^0.15.0",
-                         "pg":  "^8.23.1",
-                         "razorpay":  "^2.9.2",
-                         "socket.io":  "^4.7.5"
-                     },
-    "devDependencies":  {
-                            "prisma":  "^7.10.0"
-                        }
+    "name": "anmol-videography-server",
+    "version": "1.0.0",
+    "description": "Backend server for Anmol VideoGraphy Wedding Management Platform",
+    "main": "src/index.js",
+    "scripts": {
+        "dev": "node --watch src/index.js",
+        "start": "node src/index.js",
+        "seed": "node src/db/seed.js"
+    },
+    "dependencies": {
+        "@prisma/client": "^7.10.0",
+        "bcryptjs": "^2.4.3",
+        "cloudinary": "^2.11.0",
+        "cors": "^2.8.5",
+        "dotenv": "^16.6.1",
+        "express": "^4.19.2",
+        "express-async-errors": "^3.1.1",
+        "jsonwebtoken": "^9.0.2",
+        "multer": "^1.4.5-lts.1",
+        "nodemailer": "^6.9.13",
+        "pdfkit": "^0.15.0",
+        "pg": "^8.23.1",
+        "razorpay": "^2.9.2",
+        "socket.io": "^4.7.5"
+    },
+    "devDependencies": {
+        "prisma": "^7.10.0"
+    }
 }
