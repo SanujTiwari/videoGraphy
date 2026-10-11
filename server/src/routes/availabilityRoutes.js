@@ -132,10 +132,16 @@ router.patch('/admin/teams/:id', authenticateToken, requireRole(['owner', 'manag
     return res.json({ message: 'Team updated successfully' });
 });
 
-// DELETE /api/availability/admin/teams/:id - Deactivate/Delete team
-router.delete('/admin/teams/:id', authenticateToken, requireRole(['owner']), async (req, res) => {
-    await db.prepare("UPDATE studio_teams SET status = 'inactive' WHERE id = ?").run(req.params.id);
-    return res.json({ message: 'Team deactivated successfully' });
+// DELETE /api/availability/admin/teams/:id - Delete team
+router.delete('/admin/teams/:id', authenticateToken, requireRole(['owner', 'manager']), async (req, res) => {
+    try {
+        await db.prepare("DELETE FROM studio_teams WHERE id = ?").run(req.params.id);
+        return res.json({ message: 'Team deleted successfully' });
+    } catch (err) {
+        // If referenced by past allocation, mark inactive safely
+        await db.prepare("UPDATE studio_teams SET status = 'inactive' WHERE id = ?").run(req.params.id);
+        return res.json({ message: 'Team marked inactive' });
+    }
 });
 
 // --- EQUIPMENT MANAGEMENT ---
@@ -191,6 +197,18 @@ router.patch('/admin/equipment/:id', authenticateToken, requireRole(['owner', 'm
     );
 
     return res.json({ message: 'Equipment updated successfully' });
+});
+
+// DELETE /api/availability/admin/equipment/:id - Delete equipment asset
+router.delete('/admin/equipment/:id', authenticateToken, requireRole(['owner', 'manager']), async (req, res) => {
+    try {
+        await db.prepare("DELETE FROM equipment WHERE id = ?").run(req.params.id);
+        return res.json({ message: 'Equipment kit deleted successfully' });
+    } catch (err) {
+        // If referenced by past allocation, mark retired
+        await db.prepare("UPDATE equipment SET availability = 'maintenance' WHERE id = ?").run(req.params.id);
+        return res.json({ message: 'Equipment kit marked in maintenance' });
+    }
 });
 
 // --- MANUAL BLOCKS (Date, Time Slot, Team, Equipment, Capacity) ---

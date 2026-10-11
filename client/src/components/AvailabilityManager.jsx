@@ -136,11 +136,41 @@ export const AvailabilityManager = () => {
 
   // Delete Block
   const handleDeleteBlock = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this block? / क्या आप इस ब्लॉक को हटाना चाहते हैं?')) return;
     try {
       await apiRequest(`/availability/admin/blocks/${id}`, { method: 'DELETE' });
+      setSuccess('Block deleted successfully! ✓');
       loadData();
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  // Delete Team
+  const handleDeleteTeam = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to delete team "${name}"? / क्या आप "${name}" टीम को हटाना चाहते हैं?`)) return;
+    setError('');
+    setSuccess('');
+    try {
+      const res = await apiRequest(`/availability/admin/teams/${id}`, { method: 'DELETE' });
+      setSuccess(res.message || 'Team deleted successfully! ✓');
+      loadData();
+    } catch (err) {
+      setError(err.message || 'Failed to delete team');
+    }
+  };
+
+  // Delete Equipment
+  const handleDeleteEquipment = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to delete "${name}"? / क्या आप इस उपकरण को हटाना चाहते हैं?`)) return;
+    setError('');
+    setSuccess('');
+    try {
+      const res = await apiRequest(`/availability/admin/equipment/${id}`, { method: 'DELETE' });
+      setSuccess(res.message || 'Equipment deleted successfully! ✓');
+      loadData();
+    } catch (err) {
+      setError(err.message || 'Failed to delete equipment');
     }
   };
 
@@ -222,20 +252,20 @@ export const AvailabilityManager = () => {
           </p>
         </div>
 
-        <div className="flex bg-gold-50 border border-gold-300/60 rounded-full p-1 text-xs">
+        <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-gold-50 border border-gold-300/60 rounded-2xl sm:rounded-full p-1 text-xs w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setActiveSubTab('calendar')}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full font-semibold transition ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl sm:rounded-full font-semibold transition ${
               activeSubTab === 'calendar' ? 'gold-gradient-bg text-white shadow-sm' : 'text-charcoal-700 hover:text-gold-700'
             }`}
           >
-            <CalendarIcon className="w-3.5 h-3.5" /> Availability Calendar
+            <CalendarIcon className="w-3.5 h-3.5" /> Calendar View
           </button>
           <button
             type="button"
             onClick={() => setActiveSubTab('resources')}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full font-semibold transition ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl sm:rounded-full font-semibold transition ${
               activeSubTab === 'resources' ? 'gold-gradient-bg text-white shadow-sm' : 'text-charcoal-700 hover:text-gold-700'
             }`}
           >
@@ -244,7 +274,7 @@ export const AvailabilityManager = () => {
           <button
             type="button"
             onClick={() => setActiveSubTab('blocks')}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full font-semibold transition ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl sm:rounded-full font-semibold transition ${
               activeSubTab === 'blocks' ? 'gold-gradient-bg text-white shadow-sm' : 'text-charcoal-700 hover:text-gold-700'
             }`}
           >
@@ -271,16 +301,37 @@ export const AvailabilityManager = () => {
           SUB-TAB A: RESOURCE MANAGEMENT
          ======================================================== */}
       {activeSubTab === 'resources' && (
-        <div className="space-y-8">
+        <div className="space-y-6">
+          {/* Buyer-friendly explanatory banner */}
+          <div className="bg-gradient-to-r from-gold-50/80 via-white to-gold-50/50 border border-gold-300/60 rounded-2xl p-4 sm:p-5 shadow-xs">
+            <div className="flex items-start gap-3">
+              <span className="text-xl">💡</span>
+              <div className="space-y-1 text-xs">
+                <p className="font-bold text-charcoal-900 text-sm">
+                  Owner Quick Guide / संसाधन प्रबंधन गाइड
+                </p>
+                <p className="text-charcoal-700 leading-relaxed">
+                  यहाँ से आप अपनी <b>Production Teams</b> (Photographer/Videographer) और <b>Camera/Drone Equipment</b> जोड़ (Add) व हटा (Delete) सकते हैं। 
+                  आपकी सुविधा के लिए अभी <b>2 डेमो टीमें</b> और <b>2 डेमो उपकरण</b> रखे गए हैं ताकि आप इसे आसानी से समझ सकें। आप कभी भी नया जोड़ सकते हैं या डिलीट कर सकते हैं।
+                </p>
+                <div className="flex flex-wrap gap-2 pt-1 text-[11px] font-semibold text-gold-900">
+                  <span className="bg-white/80 border border-gold-300 px-2.5 py-0.5 rounded-full">✓ 1-Click Delete Available</span>
+                  <span className="bg-white/80 border border-gold-300 px-2.5 py-0.5 rounded-full">✓ 100% Mobile Responsive</span>
+                  <span className="bg-white/80 border border-gold-300 px-2.5 py-0.5 rounded-full">✓ Active/Inactive Toggle</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* 1. Teams Section */}
           <div className={box}>
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gold-200/60 pb-4">
               <div>
                 <h3 className="font-serif text-xl font-bold text-charcoal-900 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-gold-600" /> Studio Production Teams
+                  <Users className="w-5 h-5 text-gold-600" /> Studio Production Teams ({overview.teams.length})
                 </h3>
                 <p className="text-xs text-charcoal-500">
-                  Configured photography, videography, and aerial drone units.
+                  Photography, videography, and aerial drone units. Can be deleted or added anytime.
                 </p>
               </div>
             </div>
@@ -288,8 +339,8 @@ export const AvailabilityManager = () => {
             {/* Teams Grid */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {overview.teams.map((team) => (
-                <div key={team.id} className="bg-white border border-gold-300/50 rounded-2xl p-4 shadow-sm space-y-3 relative">
-                  <div className="flex justify-between items-start">
+                <div key={team.id} className="bg-white border border-gold-300/50 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3 relative hover:shadow-md transition">
+                  <div className="flex justify-between items-start gap-2">
                     <div>
                       <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                         team.team_type === 'photography' ? 'bg-blue-100 text-blue-800' :
@@ -300,15 +351,25 @@ export const AvailabilityManager = () => {
                       </span>
                       <h4 className="font-serif font-bold text-charcoal-900 text-base mt-1">{team.name}</h4>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleTeamStatus(team)}
-                      className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${
-                        team.status === 'active' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-charcoal-50 border-charcoal-200 text-charcoal-500'
-                      }`}
-                    >
-                      {team.status === 'active' ? 'Active' : 'Inactive'}
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleTeamStatus(team)}
+                        className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold border transition ${
+                          team.status === 'active' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-charcoal-50 border-charcoal-200 text-charcoal-500'
+                        }`}
+                      >
+                        {team.status === 'active' ? 'Active' : 'Inactive'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTeam(team.id, team.name)}
+                        title="Delete this team"
+                        className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-700 transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="text-xs text-charcoal-600 space-y-1">
@@ -321,9 +382,11 @@ export const AvailabilityManager = () => {
             </div>
 
             {/* Add New Team Form */}
-            <form onSubmit={handleAddTeam} className="bg-gold-50/40 border border-gold-200/60 rounded-2xl p-5 space-y-3">
-              <h4 className="font-serif font-bold text-sm text-charcoal-900">Add New Production Team</h4>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+            <form onSubmit={handleAddTeam} className="bg-gold-50/40 border border-gold-200/60 rounded-2xl p-4 sm:p-5 space-y-3">
+              <h4 className="font-serif font-bold text-sm text-charcoal-900 flex items-center gap-1.5">
+                <Plus className="w-4 h-4 text-gold-600" /> Add New Production Team
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
                 <div>
                   <label className={labelClass}>Team Name</label>
                   <input
@@ -370,7 +433,7 @@ export const AvailabilityManager = () => {
                 </div>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 gold-gradient-bg text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5"
+                  className="w-full px-5 py-2.5 gold-gradient-bg text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 hover:opacity-95"
                 >
                   <Plus className="w-3.5 h-3.5" /> Add Team
                 </button>
@@ -383,7 +446,7 @@ export const AvailabilityManager = () => {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gold-200/60 pb-4">
               <div>
                 <h3 className="font-serif text-xl font-bold text-charcoal-900 flex items-center gap-2">
-                  <Camera className="w-5 h-5 text-gold-600" /> Equipment &amp; Kits Inventory
+                  <Camera className="w-5 h-5 text-gold-600" /> Equipment &amp; Kits Inventory ({overview.equipment.length})
                 </h3>
                 <p className="text-xs text-charcoal-500">
                   Exclusive camera rigs, drone combos, and gimbals. Avoid double-booking across overlapping events.
@@ -391,8 +454,55 @@ export const AvailabilityManager = () => {
               </div>
             </div>
 
-            {/* Equipment Table */}
-            <div className="overflow-x-auto">
+            {/* Mobile Cards View (Visible on phones < md) */}
+            <div className="grid grid-cols-1 gap-3 md:hidden">
+              {overview.equipment.map((eq) => {
+                const assignedTeam = overview.teams.find((t) => t.id === eq.assigned_team_id);
+                return (
+                  <div key={eq.id} className="bg-white border border-gold-300/50 rounded-2xl p-4 shadow-sm space-y-2">
+                    <div className="flex justify-between items-start gap-2">
+                      <div>
+                        <span className="font-mono text-xs font-bold text-gold-800 bg-gold-50 px-2 py-0.5 rounded border border-gold-200">
+                          {eq.asset_id}
+                        </span>
+                        <h4 className="font-semibold text-charcoal-900 text-sm mt-1">{eq.name}</h4>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${
+                        eq.availability === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {eq.availability}
+                      </span>
+                    </div>
+
+                    <div className="text-xs text-charcoal-600 space-y-1 pt-1">
+                      <p><b>Category:</b> <span className="capitalize">{eq.category}</span> · <b>Qty:</b> {eq.quantity}</p>
+                      <p><b>Assigned:</b> {assignedTeam ? <span className="text-gold-700 font-semibold">{assignedTeam.name}</span> : 'Shared Studio Pool'}</p>
+                      {eq.notes && <p className="text-[11px] text-charcoal-400">{eq.notes}</p>}
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-gold-100">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleEquipStatus(eq)}
+                        className="text-xs text-gold-700 hover:underline font-semibold"
+                      >
+                        {eq.availability === 'available' ? 'Mark Maintenance' : 'Set Available'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteEquipment(eq.id, eq.name)}
+                        className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-700 flex items-center gap-1 text-xs font-semibold"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Equipment Table (Visible on md and above) */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-charcoal-900 text-gold-300 uppercase">
                   <tr>
@@ -402,7 +512,7 @@ export const AvailabilityManager = () => {
                     <th className="p-3">Quantity</th>
                     <th className="p-3">Assigned Team</th>
                     <th className="p-3">Availability</th>
-                    <th className="p-3">Action</th>
+                    <th className="p-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gold-100 bg-white">
@@ -427,13 +537,21 @@ export const AvailabilityManager = () => {
                             {eq.availability}
                           </span>
                         </td>
-                        <td className="p-3">
+                        <td className="p-3 text-right space-x-2">
                           <button
                             type="button"
                             onClick={() => handleToggleEquipStatus(eq)}
                             className="text-xs text-gold-700 hover:underline font-semibold"
                           >
                             {eq.availability === 'available' ? 'Mark Maintenance' : 'Set Available'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteEquipment(eq.id, eq.name)}
+                            title="Delete equipment"
+                            className="inline-flex p-1.5 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-700 transition align-middle"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </td>
                       </tr>
@@ -444,9 +562,11 @@ export const AvailabilityManager = () => {
             </div>
 
             {/* Add Equipment Form */}
-            <form onSubmit={handleAddEquipment} className="bg-gold-50/40 border border-gold-200/60 rounded-2xl p-5 space-y-3">
-              <h4 className="font-serif font-bold text-sm text-charcoal-900">Add New Gear / Kit</h4>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+            <form onSubmit={handleAddEquipment} className="bg-gold-50/40 border border-gold-200/60 rounded-2xl p-4 sm:p-5 space-y-3">
+              <h4 className="font-serif font-bold text-sm text-charcoal-900 flex items-center gap-1.5">
+                <Plus className="w-4 h-4 text-gold-600" /> Add New Gear / Kit
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
                 <div>
                   <label className={labelClass}>Asset Tag / ID</label>
                   <input
@@ -458,7 +578,7 @@ export const AvailabilityManager = () => {
                     onChange={(e) => setNewEquip({ ...newEquip, asset_id: e.target.value })}
                   />
                 </div>
-                <div className="lg:col-span-2">
+                <div className="sm:col-span-2">
                   <label className={labelClass}>Gear / Kit Name</label>
                   <input
                     required
@@ -557,10 +677,10 @@ export const AvailabilityManager = () => {
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-1.5 pt-2">
+            <div className="grid grid-cols-7 gap-1 sm:gap-1.5 pt-2">
               {/* Blank cells before 1st day */}
               {Array.from({ length: firstDay }).map((_, i) => (
-                <div key={`empty-${i}`} className="h-20 rounded-xl bg-ivory-50/50"></div>
+                <div key={`empty-${i}`} className="min-h-[50px] sm:h-20 rounded-xl bg-ivory-50/50"></div>
               ))}
 
               {/* Day cells */}
@@ -582,36 +702,37 @@ export const AvailabilityManager = () => {
                     key={iso}
                     type="button"
                     onClick={() => setSelectedCalendarDate(iso)}
-                    className={`h-22 p-2 rounded-2xl border text-left transition-all flex flex-col justify-between ${
+                    className={`min-h-[52px] sm:h-22 p-1 sm:p-2 rounded-xl sm:rounded-2xl border text-left transition-all flex flex-col justify-between ${
                       isSelected
                         ? 'ring-2 ring-gold-500 border-gold-500 shadow-md bg-gold-50/30'
                         : 'border-gold-200/50 hover:bg-gold-50/40 bg-white'
                     }`}
                   >
-                    <div className="flex justify-between items-center">
-                      <span className={`text-xs font-bold ${isSelected ? 'text-gold-900' : 'text-charcoal-900'}`}>
+                    <div className="flex justify-between items-center w-full">
+                      <span className={`text-[11px] sm:text-xs font-bold ${isSelected ? 'text-gold-900' : 'text-charcoal-900'}`}>
                         {dayNum}
                       </span>
                       {stats.isBlocked ? (
-                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-red-100 text-red-700">
+                        <span className="text-[8px] sm:text-[9px] font-bold px-1 py-0.5 rounded bg-red-100 text-red-700">
                           Closed
                         </span>
                       ) : (
-                        <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full border ${badgeColor}`}>
-                          {stats.remainingCap} slots
+                        <span className={`text-[8px] sm:text-[9px] font-bold px-1 sm:px-1.5 py-0.2 rounded-full border ${badgeColor}`}>
+                          <span className="hidden sm:inline">{stats.remainingCap} slots</span>
+                          <span className="sm:hidden">{stats.remainingCap}s</span>
                         </span>
                       )}
                     </div>
 
-                    <div className="space-y-0.5 text-[10px]">
+                    <div className="space-y-0.5 text-[9px] sm:text-[10px]">
                       {stats.approved > 0 && (
                         <p className="font-semibold text-emerald-700 truncate">
-                          ✓ {stats.approved} confirmed
+                          ✓ <span className="hidden sm:inline">{stats.approved} conf</span><span className="sm:hidden">{stats.approved}</span>
                         </p>
                       )}
                       {stats.pending > 0 && (
                         <p className="font-semibold text-amber-600 truncate">
-                          ⏳ {stats.pending} pending
+                          ⏳ <span className="hidden sm:inline">{stats.pending} pend</span><span className="sm:hidden">{stats.pending}</span>
                         </p>
                       )}
                     </div>
