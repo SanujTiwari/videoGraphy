@@ -116,13 +116,47 @@ async function sendEmail(email, code) {
     `;
     const textTemplate = `Your Anmol VideoGraphy login OTP is ${code}. It is valid for 5 minutes. Do not share it with anyone.`;
 
-    // 1. Primary: Google SMTP / Custom SMTP (Free, delivers to any email address)
+    // 1. Primary: Resend SDK (Uses HTTPS port 443, never blocked by Render cloud firewall, instant delivery)
+    if (resendReady()) {
+        try {
+            const resend = new Resend(process.env.RESEND_API_KEY);
+            const fromAddress = process.env.EMAIL_FROM || 'Anmol VideoGraphy <onboarding@resend.dev>';
+
+            const { data, error } = await resend.emails.send({
+                from: fromAddress,
+                to: [email],
+                subject: 'Your Anmol VideoGraphy Login OTP',
+                html: htmlTemplate,
+                text: textTemplate,
+            });
+
+            if (error) {
+                console.error('Resend delivery notice:', error.message || error);
+                // If Resend failed (e.g. unverified recipient domain on onboarding@resend.dev), try SMTP fallback if available
+                if (!emailReady()) {
+                    throw new Error(`Email delivery failed: ${error.message || 'Unable to send email via Resend'}`);
+                }
+            } else {
+                return true;
+            }
+        } catch (err) {
+            console.error('Resend delivery attempt failed:', err.message);
+            if (!emailReady()) {
+                throw err;
+            }
+        }
+    }
+
+    // 2. Secondary / Local: Google SMTP (Nodemailer with 5s strict timeout so it never hangs indefinitely)
     if (emailReady()) {
         try {
             const transporter = nodemailer.createTransport({
                 host: process.env.SMTP_HOST || 'smtp.gmail.com',
                 port: Number(process.env.SMTP_PORT) || 587,
                 secure: false,
+                connectionTimeout: 5000, // 5 seconds max connection timeout
+                greetingTimeout: 5000,
+                socketTimeout: 8000,
                 auth: {
                     user: process.env.SMTP_USER,
                     pass: process.env.SMTP_PASS,
@@ -141,26 +175,6 @@ async function sendEmail(email, code) {
             console.error('SMTP delivery error:', err.message);
             throw new Error(`Email delivery failed: ${err.message}`);
         }
-    }
-
-    // 2. Secondary fallback: Resend SDK (if SMTP not configured)
-    if (resendReady()) {
-        const resend = new Resend(process.env.RESEND_API_KEY);
-        const fromAddress = process.env.EMAIL_FROM || 'Anmol VideoGraphy <onboarding@resend.dev>';
-
-        const { data, error } = await resend.emails.send({
-            from: fromAddress,
-            to: [email],
-            subject: 'Your Anmol VideoGraphy Login OTP',
-            html: htmlTemplate,
-            text: textTemplate,
-        });
-
-        if (error) {
-            console.error('Resend delivery error:', error.message || error);
-            throw new Error(`Email delivery failed: ${error.message || 'Unable to send email via Resend'}`);
-        }
-        return true;
     }
 
     return false;
