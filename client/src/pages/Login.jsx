@@ -12,13 +12,16 @@ export const Login = () => {
     const [who, setWho] = useState('user'); // 'user' or 'admin'
     const [otpSent, setOtpSent] = useState(false);
     const [email, setEmail] = useState('');
-    const [otp, setOtp] = useState('');
+    const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', '']);
+    const [otpStatus, setOtpStatus] = useState('idle'); // 'idle' | 'error' | 'success'
+    const [shake, setShake] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
     const [cooldown, setCooldown] = useState(0);
 
     const timerRef = useRef(null);
+    const inputRefs = useRef([]);
 
     useEffect(() => {
         if (cooldown > 0) {
@@ -31,9 +34,18 @@ export const Login = () => {
         };
     }, [cooldown]);
 
+    useEffect(() => {
+        if (otpSent && inputRefs.current[0]) {
+            setTimeout(() => {
+                inputRefs.current[0]?.focus();
+            }, 100);
+        }
+    }, [otpSent]);
+
     const reset = () => {
         setOtpSent(false);
-        setOtp('');
+        setOtpDigits(['', '', '', '', '', '']);
+        setOtpStatus('idle');
         setMessage('');
         setError('');
         setCooldown(0);
@@ -57,6 +69,7 @@ export const Login = () => {
         setBusy(true);
         setError('');
         setMessage('');
+        setOtpStatus('idle');
         try {
             let data;
             if (who === 'user') {
@@ -71,8 +84,8 @@ export const Login = () => {
                 });
             }
             setOtpSent(true);
+            setOtpDigits(['', '', '', '', '', '']);
             setCooldown(60); // 60-second cooldown
-            // dev_otp only appears when email provider credentials are not configured
             setMessage(data.dev_otp ? `${data.message} (Test OTP: ${data.dev_otp})` : (data.message || 'Verification code sent to your email.'));
         } catch (err) {
             setError(err.message || 'Failed to send OTP. Please try again.');
@@ -80,12 +93,14 @@ export const Login = () => {
         setBusy(false);
     };
 
-    // Step 2: check the OTP and log in
-    const verifyOtp = async (e) => {
-        e.preventDefault();
-        const trimmedOtp = otp.trim();
+    // Verify OTP with a given 6-digit string
+    const verifyOtpWithCode = async (code) => {
+        const trimmedOtp = (code || otpDigits.join('')).trim();
         if (trimmedOtp.length !== 6) {
-            setError('Please enter the 6-digit OTP');
+            setError('Please enter all 6 digits of the verification code');
+            setOtpStatus('error');
+            setShake(true);
+            setTimeout(() => setShake(false), 500);
             return;
         }
 
@@ -104,12 +119,96 @@ export const Login = () => {
                     body: JSON.stringify({ email: email.trim(), otp: trimmedOtp })
                 });
             }
-            const user = saveLogin(data);
-            navigate(user.role === 'customer' ? '/portal' : '/admin/dashboard');
+            // Success state - green boxes and Accepted text (matches Image 4)
+            setOtpStatus('success');
+            setMessage('Accepted');
+            setTimeout(() => {
+                const user = saveLogin(data);
+                navigate(user.role === 'customer' ? '/portal' : '/admin/dashboard');
+            }, 600);
         } catch (err) {
-            setError(err.message || 'Verification failed. Please check the OTP.');
+            // Error state - red boxes and error message (matches Image 3)
+            setOtpStatus('error');
+            setShake(true);
+            setError(err.message || 'Incorrect code. Please try again');
+            setTimeout(() => setShake(false), 500);
         }
         setBusy(false);
+    };
+
+    // Handle single digit input
+    const handleDigitChange = (index, value) => {
+        const cleanVal = value.replace(/\D/g, '');
+        const newDigits = [...otpDigits];
+
+        if (cleanVal.length > 0) {
+            // Take the last entered character
+            newDigits[index] = cleanVal.slice(-1);
+            setOtpDigits(newDigits);
+            if (otpStatus !== 'idle') setOtpStatus('idle');
+            if (error) setError('');
+
+            // Auto-focus next box
+            if (index < 5) {
+                inputRefs.current[index + 1]?.focus();
+            }
+
+            // If complete 6-digit entered, auto verify
+            const completedCode = newDigits.join('');
+            if (completedCode.length === 6) {
+                verifyOtpWithCode(completedCode);
+            }
+        } else {
+            // Cleared
+            newDigits[index] = '';
+            setOtpDigits(newDigits);
+            if (otpStatus !== 'idle') setOtpStatus('idle');
+        }
+    };
+
+    // Handle backspace and arrow navigation
+    const handleKeyDown = (index, e) => {
+        if (e.key === 'Backspace') {
+            if (!otpDigits[index] && index > 0) {
+                // Focus previous and clear
+                e.preventDefault();
+                const newDigits = [...otpDigits];
+                newDigits[index - 1] = '';
+                setOtpDigits(newDigits);
+                inputRefs.current[index - 1]?.focus();
+                if (otpStatus !== 'idle') setOtpStatus('idle');
+            } else if (otpDigits[index]) {
+                const newDigits = [...otpDigits];
+                newDigits[index] = '';
+                setOtpDigits(newDigits);
+                if (otpStatus !== 'idle') setOtpStatus('idle');
+            }
+        } else if (e.key === 'ArrowLeft' && index > 0) {
+            e.preventDefault();
+            inputRefs.current[index - 1]?.focus();
+        } else if (e.key === 'ArrowRight' && index < 5) {
+            e.preventDefault();
+            inputRefs.current[index + 1]?.focus();
+        }
+    };
+
+    // Handle paste of 6-digit OTP
+    const handlePaste = (e) => {
+        e.preventDefault();
+        const pastedText = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+        if (pastedText.length > 0) {
+            const newDigits = pastedText.split('').concat(Array(6).fill('')).slice(0, 6);
+            setOtpDigits(newDigits);
+            if (otpStatus !== 'idle') setOtpStatus('idle');
+            if (error) setError('');
+
+            const nextFocusIndex = Math.min(pastedText.length, 5);
+            inputRefs.current[nextFocusIndex]?.focus();
+
+            if (pastedText.length === 6) {
+                verifyOtpWithCode(pastedText);
+            }
+        }
     };
 
     const input = 'w-full rounded-xl border border-gold-300/60 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gold-400 transition-all placeholder:text-charcoal-400';
@@ -140,7 +239,7 @@ export const Login = () => {
                         {switchButton('admin', 'Admin / Studio Owner')}
                     </div>
 
-                    <form onSubmit={otpSent ? verifyOtp : sendOtp} className="space-y-4">
+                    <form onSubmit={otpSent ? (e) => { e.preventDefault(); verifyOtpWithCode(); } : sendOtp} className="space-y-4">
                         {/* Email Address Input */}
                         <div>
                             <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-1.5">
@@ -161,52 +260,88 @@ export const Login = () => {
                             />
                         </div>
 
-                        {/* OTP Verification Input */}
+                        {/* 6-Digit Segmented OTP Verification Boxes */}
                         {otpSent && (
-                            <div className="animate-fadeIn">
-                                <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-1.5">
+                            <div className="animate-fadeIn pt-1">
+                                <label className="block text-xs font-semibold text-charcoal-700 uppercase tracking-wider mb-2.5">
                                     6-Digit Verification Code
                                 </label>
-                                <input
-                                    required
-                                    autoFocus
-                                    inputMode="numeric"
-                                    maxLength={6}
-                                    pattern="\d{6}"
-                                    className={`${input} tracking-widest text-center text-lg font-bold`}
-                                    placeholder="••••••"
-                                    value={otp}
-                                    disabled={busy}
-                                    onChange={(e) => {
-                                        setOtp(e.target.value.replace(/\D/g, ''));
-                                        if (error) setError('');
-                                    }}
-                                />
-                                <div className="flex justify-between items-center mt-2 text-xs">
-                                    <span className="text-charcoal-500">Sent to {email}</span>
-                                    {cooldown > 0 ? (
-                                        <span className="text-gold-700 font-medium">Resend in {cooldown}s</span>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            disabled={busy}
-                                            onClick={() => sendOtp()}
-                                            className="text-gold-700 hover:text-gold-800 font-semibold underline disabled:opacity-50"
-                                        >
-                                            Resend OTP
-                                        </button>
-                                    )}
+
+                                {/* 6 Individual OTP Boxes (Matches Image 2, 3, 4) */}
+                                <div
+                                    className={`flex items-center justify-between gap-1.5 sm:gap-2.5 py-1 ${
+                                        shake ? 'animate-otp-shake' : ''
+                                    }`}
+                                >
+                                    {[0, 1, 2, 3, 4, 5].map((index) => {
+                                        const boxClass = `otp-digit-box ${
+                                            otpStatus === 'error'
+                                                ? 'otp-box-error'
+                                                : otpStatus === 'success'
+                                                ? 'otp-box-success'
+                                                : ''
+                                        }`;
+
+                                        return (
+                                            <input
+                                                key={index}
+                                                ref={(el) => (inputRefs.current[index] = el)}
+                                                type="text"
+                                                inputMode="numeric"
+                                                pattern="[0-9]*"
+                                                maxLength={1}
+                                                disabled={busy || otpStatus === 'success'}
+                                                value={otpDigits[index]}
+                                                onChange={(e) => handleDigitChange(index, e.target.value)}
+                                                onKeyDown={(e) => handleKeyDown(index, e)}
+                                                onPaste={handlePaste}
+                                                className={boxClass}
+                                                aria-label={`Digit ${index + 1}`}
+                                            />
+                                        );
+                                    })}
                                 </div>
+
+                                {/* Status Feedback under Boxes */}
+                                {otpStatus === 'error' ? (
+                                    /* Image 3: Red text below boxes */
+                                    <p className="text-xs sm:text-sm text-red-600 font-medium mt-2 animate-fadeIn">
+                                        {error || 'Incorrect code. Please try again'}
+                                    </p>
+                                ) : otpStatus === 'success' ? (
+                                    /* Image 4: Green 'Accepted' text below boxes */
+                                    <p className="text-xs sm:text-sm text-green-600 font-semibold mt-2 animate-fadeIn">
+                                        Accepted
+                                    </p>
+                                ) : (
+                                    <div className="flex justify-between items-center mt-2.5 text-xs">
+                                        <span className="text-charcoal-500 truncate max-w-[200px]">
+                                            Sent to {email}
+                                        </span>
+                                        {cooldown > 0 ? (
+                                            <span className="text-gold-700 font-medium">Resend in {cooldown}s</span>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                disabled={busy}
+                                                onClick={() => sendOtp()}
+                                                className="text-gold-700 hover:text-gold-800 font-semibold underline disabled:opacity-50"
+                                            >
+                                                Resend OTP
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+
+                                {otpStatus !== 'error' && message && otpStatus !== 'success' && (
+                                    <div className="rounded-xl bg-green-50 border border-green-200 p-2.5 text-xs text-green-800 mt-2">
+                                        {message}
+                                    </div>
+                                )}
                             </div>
                         )}
 
-                        {message && (
-                            <div className="rounded-xl bg-green-50 border border-green-200 p-3 text-xs text-green-800">
-                                {message}
-                            </div>
-                        )}
-
-                        {error && (
+                        {error && !otpSent && (
                             <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-700 font-medium">
                                 {error}
                             </div>
@@ -214,8 +349,8 @@ export const Login = () => {
 
                         <button
                             type="submit"
-                            disabled={busy}
-                            className="w-full gold-gradient-bg text-white font-semibold py-3.5 rounded-full shadow-sm hover:opacity-95 disabled:opacity-60 transition-all flex items-center justify-center gap-2"
+                            disabled={busy || (otpSent && otpDigits.join('').length !== 6)}
+                            className="w-full gold-gradient-bg text-white font-semibold py-3.5 rounded-full shadow-sm hover:opacity-95 disabled:opacity-60 transition-all flex items-center justify-center gap-2 mt-2"
                         >
                             {busy ? (
                                 <>
