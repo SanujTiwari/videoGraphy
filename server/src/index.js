@@ -84,7 +84,7 @@ app.use('/api/gallery', galleryRoutes);
 // Uploaded photos
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 // Root Status Health Check
-app.get('/api/health', (_req, res) => {
+app.get(['/', '/api/health'], (_req, res) => {
     res.json({
         status: 'ONLINE',
         brand: 'Anmol VideoGraphy',

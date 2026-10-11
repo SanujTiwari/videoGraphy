@@ -41,32 +41,75 @@ async function getAdmin() {
     return db.prepare('SELECT * FROM users WHERE role = ? LIMIT 1').get('owner');
 }
 
-// ---------------- USER (mobile + OTP) ----------------
+// ---------------- USER (email / mobile + OTP) ----------------
 
 // POST /api/auth/user/send-otp
 router.post('/user/send-otp', async (req, res) => {
-    const mobile = cleanMobile(req.body.mobile);
-    if (!/^[6-9]\d{9}$/.test(mobile)) {
-        return res.status(400).json({ error: 'Please enter a valid 10-digit mobile number' });
+    if (req.body.email) {
+        const email = cleanEmail(req.body.email);
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: 'Please enter a valid email address' });
+        }
+        return sendOtpOrFail(res, 'email', email, 'user_login');
     }
-    return sendOtpOrFail(res, 'sms', mobile, 'user_login');
+
+    if (req.body.mobile) {
+        const mobile = cleanMobile(req.body.mobile);
+        if (!/^[6-9]\d{9}$/.test(mobile)) {
+            return res.status(400).json({ error: 'Please enter a valid 10-digit mobile number' });
+        }
+        return sendOtpOrFail(res, 'sms', mobile, 'user_login');
+    }
+
+    return res.status(400).json({ error: 'Please provide a valid email address' });
 });
 
-// POST /api/auth/user/verify-otp  (new numbers get an account automatically)
+// POST /api/auth/user/verify-otp (finds or creates customer account automatically)
 router.post('/user/verify-otp', async (req, res) => {
-    const mobile = cleanMobile(req.body.mobile);
-    const result = await checkOtp(mobile, 'user_login', String(req.body.otp || '').trim());
-    if (!result.ok) return res.status(400).json({ error: result.error });
-
-    let user = await db.prepare('SELECT * FROM users WHERE role = ? AND (mobile = ? OR mobile = ?)').get('customer', mobile, `+91${mobile}`);
-    if (!user) {
-        const created = await db.prepare(`
-          INSERT INTO users (email, password_hash, full_name, mobile, role, permissions)
-          VALUES (?, '', 'Customer', ?, 'customer', ?)
-        `).run(`${mobile}@mobile.local`, mobile, JSON.stringify(['view_bookings']));
-        user = await db.prepare('SELECT * FROM users WHERE id = ?').get(created.lastInsertRowid);
+    const otp = String(req.body.otp || '').trim();
+    if (!otp) {
+        return res.status(400).json({ error: 'Please provide the 6-digit OTP' });
     }
-    return sendToken(res, user, 'Login successful');
+
+    if (req.body.email) {
+        const email = cleanEmail(req.body.email);
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: 'Please enter a valid email address' });
+        }
+
+        const result = await checkOtp(email, 'user_login', otp);
+        if (!result.ok) return res.status(400).json({ error: result.error });
+
+        let user = await db.prepare('SELECT * FROM users WHERE email = ? LIMIT 1').get(email);
+        if (!user) {
+            // New customer registration - role is strictly enforced by server as 'customer'
+            const created = await db.prepare(`
+              INSERT INTO users (email, password_hash, full_name, mobile, role, permissions)
+              VALUES (?, '', 'Customer', '', 'customer', ?)
+            `).run(email, JSON.stringify(['view_bookings']));
+            user = await db.prepare('SELECT * FROM users WHERE id = ?').get(created.lastInsertRowid);
+        }
+
+        return sendToken(res, user, 'Login successful');
+    }
+
+    if (req.body.mobile) {
+        const mobile = cleanMobile(req.body.mobile);
+        const result = await checkOtp(mobile, 'user_login', otp);
+        if (!result.ok) return res.status(400).json({ error: result.error });
+
+        let user = await db.prepare('SELECT * FROM users WHERE role = ? AND (mobile = ? OR mobile = ?)').get('customer', mobile, `+91${mobile}`);
+        if (!user) {
+            const created = await db.prepare(`
+              INSERT INTO users (email, password_hash, full_name, mobile, role, permissions)
+              VALUES (?, '', 'Customer', ?, 'customer', ?)
+            `).run(`${mobile}@mobile.local`, mobile, JSON.stringify(['view_bookings']));
+            user = await db.prepare('SELECT * FROM users WHERE id = ?').get(created.lastInsertRowid);
+        }
+        return sendToken(res, user, 'Login successful');
+    }
+
+    return res.status(400).json({ error: 'Please provide email and OTP' });
 });
 
 // ---------------- ADMIN / OWNER (email + OTP) ----------------

@@ -28,11 +28,11 @@ export const Contact = () => {
       <PageHeader eyebrow="Get In Touch" title="Contact Us" subtitle="Tell us about your celebration and we will get back to you shortly."/>
       <section className="max-w-6xl mx-auto px-4 py-10 sm:py-16 grid lg:grid-cols-5 gap-8 sm:gap-10">
         <div className="lg:col-span-2 space-y-5 text-sm text-charcoal-700">
-          <div className="flex gap-3"><MapPin className="w-5 h-5 text-gold-500 shrink-0"/> 101 Royal Wedding Square, Studio Road, City Center</div>
-          <div className="flex gap-3"><Phone className="w-5 h-5 text-gold-500 shrink-0"/> +91 98765 43210</div>
+          <div className="flex gap-3"><MapPin className="w-5 h-5 text-gold-500 shrink-0"/> Kanhachatti, Chatra, Jharkhand</div>
+          <div className="flex gap-3"><Phone className="w-5 h-5 text-gold-500 shrink-0"/> +91 8383813876</div>
           <div className="flex gap-3"><Mail className="w-5 h-5 text-gold-500 shrink-0"/> contact@anmolvideography.com</div>
           <div className="flex gap-3"><Clock className="w-5 h-5 text-gold-500 shrink-0"/> Mon - Sat, 10:00 AM - 7:00 PM</div>
-          <a href="https://wa.me/919876543210" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-emerald-800 text-white px-5 py-3 rounded-full font-semibold">
+          <a href="https://wa.me/918383813876" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-emerald-800 text-white px-5 py-3 rounded-full font-semibold">
             <MessageCircle className="w-4 h-4"/> Chat on WhatsApp
           </a>
         </div>
