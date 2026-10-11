@@ -13,20 +13,20 @@
   }
 }
 
-/* Custom Elegant Champagne/Taupe Gradient (Replaces Gold) */
+/* True Royal Gold Gradient System (Warm, Luxury, Classic) */
 .gold-gradient-text {
-  background: linear-gradient(135deg, #9b8a78 0%, #b5a491 50%, #d4c5b3 100%);
+  background: linear-gradient(135deg, #d4af37 0%, #f3d07a 40%, #b8860b 80%, #996515 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gold-gradient-bg {
-  background: linear-gradient(135deg, #c5d0d6 0%, #b5c1c8 100%);
-  color: #27272a !important;
+  background: linear-gradient(135deg, #d4af37 0%, #c59b27 50%, #b8860b 100%) !important;
+  color: #ffffff !important;
 }
 
 .gold-gradient-border {
-  border-image: linear-gradient(135deg, #d4c5b3, #fdfaf6, #b5a491) 1;
+  border-image: linear-gradient(135deg, #d4af37, #fdfaf6, #b8860b) 1;
 }
 
 .glass-card {

@@ -160,18 +160,18 @@ export const MultiStepBookingModal = () => {
             setIsSubmitting(false);
         }
     };
-    return (<div className="fixed inset-0 z-50 bg-charcoal-900/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-ivory-50 border border-gold-400/40 rounded-3xl shadow-2xl overflow-hidden my-auto">
+    return (<div className="fixed inset-0 z-50 bg-charcoal-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div className="relative w-full max-w-4xl bg-white border border-gold-300/60 rounded-3xl shadow-2xl overflow-hidden my-auto">
         
         {/* Header Bar */}
         <div className="bg-charcoal-900 text-white px-6 py-5 flex items-center justify-between border-b border-gold-400/30">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full gold-gradient-bg flex items-center justify-center text-white">
+            <div className="w-10 h-10 rounded-full gold-gradient-bg flex items-center justify-center text-white shadow-md">
               <Sparkles className="w-5 h-5 fill-white"/>
             </div>
             <div>
               <span className="text-[10px] font-bold uppercase tracking-widest text-gold-400">Anmol Studio Booking Wizard</span>
-              <h3 className="font-serif text-xl font-bold">Reserve Your Wedding Story</h3>
+              <h3 className="font-serif text-xl font-bold tracking-wide text-white">Reserve Your Wedding Story</h3>
             </div>
           </div>
           <button onClick={closeWizard} className="text-charcoal-400 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors">
@@ -180,7 +180,7 @@ export const MultiStepBookingModal = () => {
         </div>
 
         {/* Step Indicator Bar */}
-        {currentStep < 7 && (<div className="bg-ivory-100 px-6 py-3 border-b border-gold-200 flex items-center justify-between overflow-x-auto text-xs font-semibold text-charcoal-600">
+        {currentStep < 7 && (<div className="bg-slate-50 px-6 py-3 border-b border-slate-200/90 flex items-center justify-between overflow-x-auto text-xs font-semibold text-charcoal-600">
             {[
                 { num: 1, label: 'Event Type' },
                 { num: 2, label: 'Package' },
@@ -188,12 +188,12 @@ export const MultiStepBookingModal = () => {
                 { num: 4, label: 'Details' },
                 { num: 5, label: 'Availability' },
                 { num: 6, label: 'Summary' },
-            ].map((st) => (<div key={st.num} className={`flex items-center gap-1.5 shrink-0 px-3 py-1 rounded-full ${currentStep === st.num
-                    ? 'gold-gradient-bg text-white shadow-sm'
+            ].map((st) => (<div key={st.num} className={`flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-full transition-all ${currentStep === st.num
+                    ? 'gold-gradient-bg text-white font-bold shadow-sm'
                     : currentStep > st.num
-                        ? 'text-gold-600 font-bold'
-                        : 'text-charcoal-400'}`}>
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${currentStep === st.num ? 'bg-white text-gold-600' : 'bg-charcoal-200 text-charcoal-700'}`}>
+                        ? 'text-amber-800 bg-amber-50 font-bold border border-amber-200/80'
+                        : 'text-charcoal-500 bg-white border border-slate-200'}`}>
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${currentStep === st.num ? 'bg-white text-amber-700' : 'bg-slate-200 text-charcoal-700'}`}>
                   {st.num}
                 </span>
                 <span>{st.label}</span>
@@ -207,16 +207,26 @@ export const MultiStepBookingModal = () => {
           {currentStep === 1 && (<div className="space-y-6 animate-fade-in">
               <div className="text-center max-w-xl mx-auto">
                 <h4 className="font-serif text-2xl font-bold text-charcoal-900">Step 1: What Event Are We Capturing?</h4>
-                <p className="text-xs text-charcoal-600 mt-1">Select the event ceremony you are planning.</p>
+                <p className="text-xs text-charcoal-600 mt-1 font-medium">Select the ceremony you are planning to customize your crew and equipment.</p>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                {EVENT_TYPES.map((type) => (<button key={type} onClick={() => setDraft((prev) => ({ ...prev, event_type: type }))} className={`p-4 rounded-2xl border text-center transition-all duration-300 flex flex-col items-center justify-center gap-2 ${draft.event_type === type
-                    ? 'gold-gradient-bg text-white font-bold border-gold-400 shadow-gold-glow scale-105'
-                    : 'bg-white text-charcoal-800 border-gold-200 hover:border-gold-400 hover:bg-gold-50/50'}`}>
-                    <Calendar className={`w-6 h-6 ${draft.event_type === type ? 'text-white' : 'text-gold-500'}`}/>
-                    <span className="text-xs font-semibold">{type}</span>
-                  </button>))}
+                {EVENT_TYPES.map((type) => {
+                  const isSelected = draft.event_type === type;
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setDraft((prev) => ({ ...prev, event_type: type }))}
+                      className={`p-4 rounded-2xl border-2 text-center transition-all duration-200 flex flex-col items-center justify-center gap-2.5 cursor-pointer ${isSelected
+                        ? 'gold-gradient-bg text-white font-bold border-amber-600 shadow-lg shadow-amber-500/25 scale-[1.03]'
+                        : 'bg-white text-charcoal-800 border-slate-200/90 hover:border-amber-400 hover:shadow-md hover:bg-amber-50/20'}`}
+                    >
+                      <Calendar className={`w-7 h-7 transition-colors ${isSelected ? 'text-white fill-white/20' : 'text-amber-600'}`}/>
+                      <span className={`text-xs font-bold tracking-wide ${isSelected ? 'text-white' : 'text-charcoal-800'}`}>{type}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>)}
 
@@ -457,16 +467,23 @@ export const MultiStepBookingModal = () => {
         </div>
 
         {/* Footer Navigation Bar */}
-        {currentStep < 7 && (<div className="bg-ivory-100 px-6 py-4 border-t border-gold-200 flex items-center justify-between">
-            <button onClick={() => setCurrentStep((prev) => Math.max(1, prev - 1))} disabled={currentStep === 1} className="text-xs font-semibold text-charcoal-700 hover:text-gold-600 disabled:opacity-40 flex items-center gap-1">
+        {currentStep < 7 && (<div className="bg-slate-50 px-6 py-4 border-t border-slate-200/90 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setCurrentStep((prev) => Math.max(1, prev - 1))}
+              disabled={currentStep === 1}
+              className="text-xs font-bold text-charcoal-700 hover:text-amber-700 disabled:opacity-40 flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
               <ArrowLeft className="w-4 h-4"/> Back
             </button>
 
-            <div className="text-xs font-bold text-gold-700">
-              Total: ₹{totals.finalTotal.toLocaleString()}
+            <div className="text-sm font-bold text-charcoal-800">
+              Total: <span className="text-amber-600 font-extrabold text-base ml-1">₹{totals.finalTotal.toLocaleString()}</span>
             </div>
 
-            {currentStep < 6 ? (<button onClick={() => {
+            {currentStep < 6 ? (<button
+                type="button"
+                onClick={() => {
                     if (currentStep === 2 && !draft.package_id) {
                         alert('Please select a package to continue.');
                         return;
@@ -476,9 +493,17 @@ export const MultiStepBookingModal = () => {
                         return;
                     }
                     setCurrentStep((prev) => prev + 1);
-                }} className="gold-gradient-bg text-white font-semibold text-xs px-6 py-2.5 rounded-full shadow-gold-glow flex items-center gap-1 hover:scale-105 transition-all">
-                Next Step <ArrowRight className="w-4 h-4"/>
-              </button>) : (<button onClick={handleSubmitBooking} disabled={isSubmitting} className="gold-gradient-bg text-white font-bold text-xs px-8 py-3 rounded-full shadow-gold-glow flex items-center gap-2 hover:scale-105 transition-all">
+                }}
+                className="gold-gradient-bg text-white font-bold text-xs px-7 py-3 rounded-full shadow-md shadow-amber-600/25 flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              >
+                <span>Next Step</span>
+                <ArrowRight className="w-4 h-4"/>
+              </button>) : (<button
+                type="button"
+                onClick={handleSubmitBooking}
+                disabled={isSubmitting}
+                className="gold-gradient-bg text-white font-bold text-xs px-8 py-3.5 rounded-full shadow-lg shadow-amber-600/30 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              >
                 {isSubmitting ? 'Transmitting Request...' : 'Submit Booking Request'}
               </button>)}
           </div>)}

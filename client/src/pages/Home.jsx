@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Play, Star, CheckCircle, ChevronRight, HelpCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Sparkles, Play, Star, CheckCircle, ChevronRight, HelpCircle, ArrowRight } from 'lucide-react';
 import { PackageGrid } from '../components/PackageCard';
 import { ServiceCard } from '../components/ServiceCard';
 import { LightboxModal } from '../components/LightboxModal';
 import { useBooking } from '../context/BookingContext';
 import { apiRequest } from '../api';
+
 export const Home = () => {
     const { openWizard } = useBooking();
     const [packages, setPackages] = useState([]);
     const [services, setServices] = useState([]);
     const [reviews, setReviews] = useState([]);
     const [activeLightboxItem, setActiveLightboxItem] = useState(null);
+
     useEffect(() => {
         apiRequest('/packages').then((d) => setPackages(d.packages || [])).catch(() => { });
         apiRequest('/services').then((d) => setServices(d.services || [])).catch(() => { });
         apiRequest('/reviews').then((d) => setReviews(d.reviews || [])).catch(() => { });
     }, []);
+
     const samplePortfolio = [
         {
             id: 1,
@@ -50,68 +54,137 @@ export const Home = () => {
             description: 'Stunning 4K high-altitude aerial view of wedding palace lawns.',
         },
     ];
-    return (<div className="space-y-24 pb-16">
+
+    return (
+      <div className="space-y-24 pb-16">
       
-      {/* HERO SECTION */}
-      <section className="relative min-h-[90vh] flex items-center justify-start overflow-hidden text-white">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=2000&q=90" alt="Wedding Cinematography" className="w-full h-full object-cover"/>
-          <div className="absolute inset-0 bg-black/30"></div>
-        </div>
-
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-6 pt-12 sm:pt-20">
-          <h3 className="text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase text-white/90">
-            PREMIUM WEDDING VIDEOGRAPHER
-          </h3>
-
-          <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl max-w-3xl font-normal leading-[1.1] text-white">
-            Creative, cinematic wedding films you'll forever obsess over
-          </h1>
-
-          <p className="max-w-2xl text-white/90 text-base sm:text-lg leading-relaxed font-light">
-            Documenting your wedding in both digital and cinematic formats with an editorial and authentic approach leaving you with a film that feels like you. As a premium wedding videographer with a love for storytelling, I work across the country and beyond — from laid-back city weddings to destination celebrations, I'll be there capturing every detail.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center gap-4 pt-6">
-            <a href="#portfolio" className="w-full sm:w-auto bg-white hover:bg-gray-100 text-charcoal-900 font-semibold text-xs sm:text-sm tracking-widest uppercase px-8 py-4 rounded-full transition-all text-center">
-              View Portfolio
-            </a>
-            <button onClick={() => openWizard()} className="w-full sm:w-auto bg-[#c5d0d6] hover:bg-[#b0bdc4] text-charcoal-900 font-semibold text-xs sm:text-sm tracking-widest uppercase px-8 py-4 rounded-full transition-all flex items-center justify-center">
-              Contact Me
-            </button>
+        {/* HERO SECTION */}
+        <section className="relative min-h-[92vh] flex items-center justify-start overflow-hidden text-white">
+          {/* Background Image with Warm Cinematic Overlay */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=2000&q=90"
+              alt="Wedding Cinematography"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-charcoal-950/90 via-charcoal-900/75 to-charcoal-900/50"></div>
           </div>
-        </div>
-      </section>
 
-      {/* FEATURED PORTFOLIO GRID */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto space-y-3 mb-12">
-          <span className="text-xs font-bold uppercase tracking-widest text-gold-600 gold-gradient-text">Visual Masterpieces</span>
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal-900">Featured Wedding Portfolio</h2>
-          <p className="text-xs sm:text-sm text-charcoal-600">Click any photograph to view high-resolution details.</p>
-        </div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-6 pt-16 sm:pt-24 pb-12">
+            
+            {/* Top Eyebrow Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-gold-400/30 text-gold-300 text-xs font-semibold tracking-widest uppercase">
+              <Sparkles className="w-3.5 h-3.5 text-gold-400" />
+              <span>Premium Wedding Photography & Cinematography</span>
+            </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {samplePortfolio.map((item) => (<div key={item.id} onClick={() => setActiveLightboxItem(item)} className="group cursor-pointer relative h-80 rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500">
-              <img src={item.url} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"/>
-              <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/90 via-charcoal-900/30 to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
-              
-              <div className="absolute inset-0 p-6 flex flex-col justify-between text-white">
-                <span className="text-[10px] font-bold uppercase tracking-widest gold-gradient-bg px-3 py-1 rounded-full w-max shadow-md">
-                  {item.category}
-                </span>
-                <div>
-                  <h4 className="font-serif text-lg font-bold group-hover:text-gold-300 transition-colors">{item.title}</h4>
-                  <p className="text-xs text-ivory-200 mt-1 line-clamp-2">{item.description}</p>
-                  <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-gold-400">
-                    <Play className="w-3.5 h-3.5 fill-gold-400"/> View Story Lightbox
+            {/* Main Headline */}
+            <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl max-w-4xl font-normal leading-[1.1] text-white">
+              Capturing Eternal Memories with{' '}
+              <span className="gold-gradient-text italic font-serif">Cinematic Elegance</span>
+            </h1>
+
+            {/* Short, Simple, Beautiful Description */}
+            <p className="max-w-xl text-white/90 text-sm sm:text-base leading-relaxed font-light">
+              From grand royal Baraats to intimate pre-wedding films, we craft timeless visual masterpieces tailored to your wedding story.
+            </p>
+
+            {/* Hero CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
+              <button
+                type="button"
+                onClick={() => openWizard()}
+                className="w-full sm:w-auto gold-gradient-bg text-white font-bold text-xs sm:text-sm tracking-wider uppercase px-8 py-4 rounded-full transition-all shadow-gold-glow flex items-center justify-center gap-2.5 hover:scale-105 active:scale-95"
+              >
+                <Sparkles className="w-4 h-4 fill-white" />
+                <span>Book Your Event Now</span>
+              </button>
+
+              <Link
+                to="/packages"
+                className="w-full sm:w-auto bg-white/10 backdrop-blur-md hover:bg-white/20 border border-white/30 text-white font-semibold text-xs sm:text-sm tracking-wider uppercase px-8 py-4 rounded-full transition-all flex items-center justify-center gap-2 hover:scale-105"
+              >
+                <span>Explore Packages</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+
+              <Link
+                to="/portfolio"
+                className="w-full sm:w-auto bg-white/5 hover:bg-white/15 text-gold-200 hover:text-white border border-gold-400/20 font-semibold text-xs sm:text-sm tracking-wider uppercase px-6 py-4 rounded-full transition-all flex items-center justify-center gap-2"
+              >
+                <span>View Portfolio</span>
+              </Link>
+            </div>
+
+            {/* 4 Key Milestone Statistics Badges */}
+            <div className="pt-10 grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8 border-t border-white/15 max-w-4xl">
+              <div>
+                <div className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">850+</div>
+                <div className="text-[11px] font-semibold tracking-widest uppercase text-gold-300 mt-1">Royal Weddings</div>
+              </div>
+              <div>
+                <div className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">15+</div>
+                <div className="text-[11px] font-semibold tracking-widest uppercase text-gold-300 mt-1">Years Experience</div>
+              </div>
+              <div>
+                <div className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">100%</div>
+                <div className="text-[11px] font-semibold tracking-widest uppercase text-gold-300 mt-1">Client Delight</div>
+              </div>
+              <div>
+                <div className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">4K UHD</div>
+                <div className="text-[11px] font-semibold tracking-widest uppercase text-gold-300 mt-1">Cinema Rig</div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* FEATURED PORTFOLIO GRID */}
+        <section id="portfolio" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
+          <div className="text-center max-w-2xl mx-auto space-y-3 mb-12">
+            <span className="text-xs font-bold uppercase tracking-widest text-gold-600 gold-gradient-text">Visual Masterpieces</span>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-charcoal-900">Featured Wedding Portfolio</h2>
+            <p className="text-xs sm:text-sm text-charcoal-600">Click any photograph to view high-resolution details.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {samplePortfolio.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => setActiveLightboxItem(item)}
+                className="group cursor-pointer relative h-80 rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500"
+              >
+                <img
+                  src={item.url}
+                  alt={item.title}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/90 via-charcoal-900/30 to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
+                
+                <div className="absolute inset-0 p-6 flex flex-col justify-between text-white">
+                  <span className="text-[10px] font-bold uppercase tracking-widest gold-gradient-bg px-3 py-1 rounded-full w-max shadow-md">
+                    {item.category}
                   </span>
+                  <div>
+                    <h4 className="font-serif text-lg font-bold group-hover:text-gold-300 transition-colors">{item.title}</h4>
+                    <p className="text-xs opacity-80 mt-1 line-clamp-2">{item.description}</p>
+                  </div>
                 </div>
               </div>
-            </div>))}
-        </div>
-      </section>
+            ))}
+          </div>
+
+          {/* View Full Portfolio Button */}
+          <div className="mt-10 text-center">
+            <Link
+              to="/portfolio"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full border border-gold-400 text-charcoal-900 hover:text-white hover:gold-gradient-bg font-semibold text-xs tracking-wider uppercase transition-all shadow-sm"
+            >
+              <span>Explore Complete Portfolio Gallery</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </section>
 
       {/* POPULAR PACKAGES SHOWCASE */}
       <section id="packages" className="scroll-animate max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
